@@ -1,14 +1,21 @@
 {
   "name": "semantic-heading-hierarchy",
-  "version": "1.0.0",
-  "description": "A JavaScript library that automatically corrects improper heading hierarchies for better accessibility and SEO",
+  "version": "1.0.2",
+  "description": "A JavaScript library that automatically invisibly corrects improper heading hierarchies for better accessibility. Used for user or admin edited content where the developer doesn't have 100% direct control over the content.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
   "files": [
@@ -16,9 +23,11 @@
     "src"
   ],
   "scripts": {
-    "build": "npm run build:esm && npm run build:cjs",
-    "build:esm": "esbuild src/index.js --bundle --format=esm --outfile=dist/index.js",
-    "build:cjs": "esbuild src/index.js --bundle --format=cjs --outfile=dist/index.cjs",
+    "build": "npm run build:types && npm run build:esm && npm run build:cjs",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:esm": "esbuild src/index.ts --bundle --format=esm --outfile=dist/index.js",
+    "build:cjs": "esbuild src/index.ts --bundle --format=cjs --outfile=dist/index.cjs",
+    "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
     "lint": "eslint src/",
@@ -52,11 +61,13 @@
     "test": "test"
   },
   "devDependencies": {
+    "@types/node": "^24.0.14",
     "esbuild": "^0.25.6",
     "eslint": "^9.31.0",
     "html-validate": "^9.7.1",
     "jsdom": "^26.1.0",
     "prettier": "^3.6.2",
+    "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   }
 }

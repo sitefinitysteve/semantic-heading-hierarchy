@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { healHeadings } from '../src/index.js';
+import { HtmlValidate } from 'html-validate';
 
 describe('healHeadings', () => {
     let container;
@@ -40,7 +41,7 @@ describe('healHeadings', () => {
         });
     });
 
-    it('should ignore headings placed before the main H1', () => {
+    it('should ignore headings placed before the main H1 and warn about it', () => {
         container.innerHTML = `
             <h2>Before H1</h2>
             <h3>Also before H1</h3>
@@ -48,7 +49,16 @@ describe('healHeadings', () => {
             <h3>After H1</h3>
         `;
 
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
         healHeadings(container);
+
+        // Should always warn about headings before H1, regardless of logging setting
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+            '⚠️  Found 2 heading(s) before H1: h2, h3. These headings will be ignored for accessibility compliance. Consider restructuring your HTML to place all content headings after the main H1.'
+        );
+
+        consoleWarnSpy.mockRestore();
 
         const beforeH1Headings = container.querySelectorAll('h2, h3');
         const h1 = container.querySelector('h1');
@@ -68,13 +78,26 @@ describe('healHeadings', () => {
         expect(afterH1Heading.getAttribute('data-prev-heading')).toBe('3');
     });
 
-    it('should add correct hs-X class and data-prev-heading attribute when changing headings', () => {
+    it('should add correct hs-X class and data-prev-heading attribute when changing headings', async () => {
         container.innerHTML = `
             <h1>Main Title</h1>
             <h4>Should become H2</h4>
         `;
 
+        // Verify html-validate detects hierarchy errors before healing
+        const htmlvalidate = new HtmlValidate({
+            rules: { 'heading-level': 'error' }
+        });
+        const reportBefore = await htmlvalidate.validateString(container.innerHTML);
+        const headingLevelErrorsBefore = reportBefore.results?.length > 0 ? reportBefore.results[0].messages.filter(m => m.ruleId === 'heading-level') : [];
+        expect(headingLevelErrorsBefore.length).toBeGreaterThan(0);
+
         healHeadings(container);
+
+        // Verify html-validate passes after healing
+        const reportAfter = await htmlvalidate.validateString(container.innerHTML);
+        const headingLevelErrorsAfter = reportAfter.results?.length > 0 ? reportAfter.results[0].messages.filter(m => m.ruleId === 'heading-level') : [];
+        expect(headingLevelErrorsAfter.length).toBe(0);
 
         const changedHeading = container.querySelector('h2');
         expect(changedHeading).toBeTruthy();
@@ -246,5 +269,113 @@ describe('healHeadings', () => {
             expect(heading.tagName.toLowerCase()).toBe('h3');
             expect(heading.hasAttribute('data-prev-heading')).toBe(false);
         });
+    });
+
+    it('should always warn about headings before H1 regardless of logging setting', () => {
+        container.innerHTML = `
+            <h4>Navigation</h4>
+            <h1>Main Title</h1>
+            <h3>After H1</h3>
+        `;
+
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+        // Test with logging disabled
+        healHeadings(container, { logResults: false });
+
+        // Should still warn about headings before H1
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+            '⚠️  Found 1 heading(s) before H1: h4. These headings will be ignored for accessibility compliance. Consider restructuring your HTML to place all content headings after the main H1.'
+        );
+
+        consoleWarnSpy.mockRestore();
+    });
+
+    it('should warn about additional H1s when forceSingleH1 is disabled', () => {
+        container.innerHTML = `
+            <h1>First H1</h1>
+            <h2>Section</h2>
+            <h1>Second H1</h1>
+            <h1>Third H1</h1>
+        `;
+
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+        healHeadings(container, { logResults: false });
+
+        // Should warn about additional H1s and suggest forceSingleH1
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+            '⚠️  Found 2 additional H1 element(s) after the first H1. These will be ignored. Consider using the forceSingleH1 option to convert them to H2 elements.'
+        );
+
+        consoleWarnSpy.mockRestore();
+
+        // Additional H1s should be ignored (not converted)
+        const allH1s = container.querySelectorAll('h1');
+        expect(allH1s.length).toBe(3); // All H1s should still be H1s
+    });
+
+    it('should convert additional H1s to H2s when forceSingleH1 is enabled', () => {
+        container.innerHTML = `
+            <h1>First H1</h1>
+            <h2>Regular Section</h2>
+            <h1>Second H1</h1>
+            <h1>Third H1</h1>
+        `;
+
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+        healHeadings(container, { forceSingleH1: true });
+
+        // Should warn about converting additional H1s
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+            '⚠️  Found 2 additional H1 element(s) after the first H1. These will be converted to H2 elements due to forceSingleH1 option.'
+        );
+
+        consoleWarnSpy.mockRestore();
+
+        // Should only have one H1 left
+        const allH1s = container.querySelectorAll('h1');
+        expect(allH1s.length).toBe(1);
+        expect(allH1s[0].textContent).toBe('First H1');
+
+        // Additional H1s should be converted to H2s with proper classes
+        const convertedH2s = container.querySelectorAll('h2[data-prev-heading="1"]');
+        expect(convertedH2s.length).toBe(2);
+        expect(convertedH2s[0].textContent).toBe('Second H1');
+        expect(convertedH2s[1].textContent).toBe('Third H1');
+        expect(convertedH2s[0].classList.contains('hs-1')).toBe(true);
+        expect(convertedH2s[1].classList.contains('hs-1')).toBe(true);
+    });
+
+    it('should handle forceSingleH1 with complex hierarchy', () => {
+        container.innerHTML = `
+            <h1>Main Title</h1>
+            <h3>Section A</h3>
+            <h1>Second Main Title</h1>
+            <h4>Subsection</h4>
+            <h1>Third Main Title</h1>
+        `;
+
+        healHeadings(container, { forceSingleH1: true });
+
+        // Should only have one H1
+        const allH1s = container.querySelectorAll('h1');
+        expect(allH1s.length).toBe(1);
+        expect(allH1s[0].textContent).toBe('Main Title');
+
+        // Check the hierarchy progression
+        const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        expect(headings[0].tagName).toBe('H1'); // Main Title
+        expect(headings[1].tagName).toBe('H2'); // Section A (H3 -> H2)
+        expect(headings[2].tagName).toBe('H2'); // Second Main Title (H1 -> H2)
+        expect(headings[3].tagName).toBe('H3'); // Subsection (H4 -> H3)
+        expect(headings[4].tagName).toBe('H2'); // Third Main Title (H1 -> H2)
+
+        // Check attributes
+        expect(headings[1].getAttribute('data-prev-heading')).toBe('3');
+        expect(headings[2].getAttribute('data-prev-heading')).toBe('1');
+        expect(headings[3].getAttribute('data-prev-heading')).toBe('4');
+        expect(headings[4].getAttribute('data-prev-heading')).toBe('1');
     });
 });

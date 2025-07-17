@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { healHeadings } from '../src/index.js';
+import { HtmlValidate } from 'html-validate';
 
 describe('healHeadings - Configurable Class Prefix', () => {
     let container;
@@ -44,13 +45,26 @@ describe('healHeadings - Configurable Class Prefix', () => {
     });
 
     describe('Custom Class Prefix', () => {
-        it('should use custom prefix when specified', () => {
+        it('should use custom prefix when specified', async () => {
             container.innerHTML = `
                 <h1>Main</h1>
                 <h4>Section</h4>
             `;
 
+            // Verify html-validate detects hierarchy errors before healing
+            const htmlvalidate = new HtmlValidate({
+                rules: { 'heading-level': 'error' }
+            });
+            const reportBefore = await htmlvalidate.validateString(container.innerHTML);
+            const headingLevelErrorsBefore = reportBefore.results?.length > 0 ? reportBefore.results[0].messages.filter(m => m.ruleId === 'heading-level') : [];
+            expect(headingLevelErrorsBefore.length).toBeGreaterThan(0);
+
             healHeadings(container, { classPrefix: 'fs-' });
+
+            // Verify html-validate passes after healing
+            const reportAfter = await htmlvalidate.validateString(container.innerHTML);
+            const headingLevelErrorsAfter = reportAfter.results?.length > 0 ? reportAfter.results[0].messages.filter(m => m.ruleId === 'heading-level') : [];
+            expect(headingLevelErrorsAfter.length).toBe(0);
 
             const heading = container.querySelector('h2');
             expect(heading.classList.contains('fs-4')).toBe(true);

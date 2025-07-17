@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { healHeadings } from '../src/index.js';
 import { loadFixture, createTestContainer, cleanupContainer, countHeadingsByLevel, analyzeHeadings } from './test-utils.js';
+import { HtmlValidate } from 'html-validate';
 
 describe('healHeadings with Advanced Layout Fixtures', () => {
     let container;
@@ -15,11 +16,28 @@ describe('healHeadings with Advanced Layout Fixtures', () => {
             container = createTestContainer(html);
         });
 
-        it('should process entire bootstrap site when no selector specified', () => {
+        it('should process entire bootstrap site when no selector specified', async () => {
             const beforeAnalysis = analyzeHeadings(container);
             const beforeCounts = countHeadingsByLevel(container);
             
+            // Verify html-validate detects hierarchy errors before healing
+            const htmlvalidate = new HtmlValidate({
+                rules: { 'heading-level': 'error' }
+            });
+            const reportBefore = await htmlvalidate.validateString(container.innerHTML);
+            const headingLevelErrorsBefore = reportBefore.results?.length > 0 ? reportBefore.results[0].messages.filter(m => m.ruleId === 'heading-level') : [];
+            expect(headingLevelErrorsBefore.length).toBeGreaterThan(0);
+            
             healHeadings(container);
+            
+            // Note: html-validate may still report errors for headings that come before H1
+            // Our healing logic correctly ignores headings that come before the first H1
+            const reportAfter = await htmlvalidate.validateString(container.innerHTML);
+            const headingLevelErrorsAfter = reportAfter.results?.length > 0 ? reportAfter.results[0].messages.filter(m => m.ruleId === 'heading-level') : [];
+            
+            // Since the bootstrap fixture has headings before the H1 (navbar), 
+            // these will not be healed and html-validate will still report errors
+            // The test should focus on verifying that headings after H1 are processed correctly
             
             const afterAnalysis = analyzeHeadings(container);
             const afterCounts = countHeadingsByLevel(container);
@@ -30,7 +48,7 @@ describe('healHeadings with Advanced Layout Fixtures', () => {
             // Should preserve H1 count (never modified)
             expect(afterCounts.h1).toBe(beforeCounts.h1);
             
-            // Should have some corrections
+            // Should have some corrections (only for headings after H1)
             const modifications = afterAnalysis.filter(h => h.hasDataPrevHeading);
             expect(modifications.length).toBeGreaterThan(0);
 
