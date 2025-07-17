@@ -345,7 +345,7 @@ healHeadings('.docs-content');
 
 ## Testing & Validation
 
-This package uses [axe-core](https://www.npmjs.com/package/axe-core) for accessibility validation in our test suite. This ensures that our heading corrections actually meet real-world accessibility standards, not just our own assumptions.
+This package uses [html-validate](https://www.npmjs.com/package/html-validate) with the `heading-level` rule for accessibility validation in our test suite. This ensures that our heading corrections actually meet real-world accessibility standards, not just our own assumptions.
 
 ### Running Tests
 
@@ -361,7 +361,7 @@ npm test -- test/rigorous-healer.test.js
 ```
 
 Our test suite includes 87+ comprehensive tests covering:
-- **axe-core validation**: Ensures bad heading structures fail accessibility tests before healing and pass after
+- **html-validate validation**: Ensures bad heading structures fail accessibility tests before healing and pass after
 - **Complex real-world scenarios**: Bootstrap grids, sidebar layouts, documentation sites
 - **List detection logic**: Multi-item vs single-item list handling
 - **Edge cases**: Nested lists, missing H1s, deeply nested headings
@@ -369,21 +369,23 @@ Our test suite includes 87+ comprehensive tests covering:
 
 ### Accessibility Validation
 
-The primary validation method in our tests is axe-core's `heading-order` rule:
+The primary validation method in our tests is html-validate's `heading-level` rule:
 
 ```javascript
 // Test pattern used throughout our test suite
-const resultsBefore = await axe.run(container, {
-    rules: { 'heading-order': { enabled: true } }
+const htmlvalidate = new HtmlValidate({
+    rules: { 'heading-level': 'error' }
 });
-expect(resultsBefore.violations.length).toBeGreaterThan(0); // Bad structure fails
+
+const reportBefore = await htmlvalidate.validateString(container.innerHTML);
+const errorsBefore = reportBefore.results[0].messages.filter(m => m.ruleId === 'heading-level');
+expect(errorsBefore.length).toBeGreaterThan(0); // Bad structure fails
 
 healHeadings(container);
 
-const resultsAfter = await axe.run(container, {
-    rules: { 'heading-order': { enabled: true } }
-});
-expect(resultsAfter.violations.length).toBe(0); // Fixed structure passes
+const reportAfter = await htmlvalidate.validateString(container.innerHTML);
+const errorsAfter = reportAfter.results[0].messages.filter(m => m.ruleId === 'heading-level');
+expect(errorsAfter.length).toBe(0); // Fixed structure passes
 ```
 
 ## Debugging
