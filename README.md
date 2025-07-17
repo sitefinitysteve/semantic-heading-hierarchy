@@ -38,7 +38,7 @@ Or via CDN:
 ```javascript
 import { healHeadings } from 'semantic-heading-hierarchy';
 
-// Fix headings in entire document
+// Fix headings in entire document, everything inside body
 healHeadings();
 
 // Fix headings in specific container
@@ -87,71 +87,48 @@ The `hs-4` class (heading-style-4) allows you to maintain the original H4 visual
 ```css
 /* Style hs-X classes to match their original heading appearance */
 h1, .hs-1 { 
-    font-size: 2rem; 
-    font-weight: bold; 
-    margin: 0.67em 0; 
+    /* Your H1 styles here */
 }
 
 h2, .hs-2 { 
-    font-size: 1.5rem; 
-    font-weight: bold; 
-    margin: 0.75em 0; 
+    /* Your H2 styles here */
 }
 
 h3, .hs-3 { 
-    font-size: 1.17rem; 
-    font-weight: bold; 
-    margin: 0.83em 0; 
+    /* Your H3 styles here */
 }
 
 h4, .hs-4 { 
-    font-size: 1rem; 
-    font-weight: bold; 
-    margin: 1.12em 0; 
+    /* Your H4 styles here */
 }
 
 h5, .hs-5 { 
-    font-size: 0.83rem; 
-    font-weight: bold; 
-    margin: 1.5em 0; 
+    /* Your H5 styles here */
 }
 
 h6, .hs-6 { 
-    font-size: 0.75rem; 
-    font-weight: bold; 
-    margin: 1.67em 0; 
+    /* Your H6 styles here */
 }
-```
-
-### Framework-Specific Examples
-
-**Bootstrap:**
-```css
-.hs-2 { @extend .h2; }
-.hs-3 { @extend .h3; }
-.hs-4 { @extend .h4; }
-.hs-5 { @extend .h5; }
-.hs-6 { @extend .h6; }
-```
-
-**Tailwind CSS:**
-```css
-.hs-2 { @apply text-3xl font-bold; }
-.hs-3 { @apply text-2xl font-bold; }
-.hs-4 { @apply text-xl font-bold; }
-.hs-5 { @apply text-lg font-bold; }
-.hs-6 { @apply text-base font-bold; }
 ```
 
 ### Custom Class Prefix
 
-You can customize the class prefix to match your existing CSS framework:
+You can customize the class prefix to match your existing CSS framework. The prefix is applied exactly as provided, giving you full control:
 
 ```javascript
-// Use custom prefix
-healHeadings('.content', { classPrefix: 'fs' }); // Creates fs-4, fs-5, etc.
-healHeadings('.content', { classPrefix: 'heading' }); // Creates heading-4, heading-5, etc.
-healHeadings('.content', { classPrefix: '' }); // Creates -4, -5, etc.
+// Default behavior (includes dash)
+healHeadings('.content'); // Creates hs-4, hs-5, etc.
+
+// Custom prefix with dash
+healHeadings('.content', { classPrefix: 'fs-' }); // Creates fs-4, fs-5, etc.
+healHeadings('.content', { classPrefix: 'heading-' }); // Creates heading-4, heading-5, etc.
+
+// Custom prefix without dash  
+healHeadings('.content', { classPrefix: 'hs' }); // Creates hs4, hs5, etc.
+healHeadings('.content', { classPrefix: 'h' }); // Creates h4, h5, etc.
+
+// Empty prefix
+healHeadings('.content', { classPrefix: '' }); // Creates 4, 5, etc.
 ```
 
 ## How It Works
@@ -366,6 +343,49 @@ healHeadings('.post-content');
 healHeadings('.docs-content');
 ```
 
+## Testing & Validation
+
+This package uses [axe-core](https://www.npmjs.com/package/axe-core) for accessibility validation in our test suite. This ensures that our heading corrections actually meet real-world accessibility standards, not just our own assumptions.
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm test -- --watch
+
+# Run specific test file
+npm test -- test/rigorous-healer.test.js
+```
+
+Our test suite includes 87+ comprehensive tests covering:
+- **axe-core validation**: Ensures bad heading structures fail accessibility tests before healing and pass after
+- **Complex real-world scenarios**: Bootstrap grids, sidebar layouts, documentation sites
+- **List detection logic**: Multi-item vs single-item list handling
+- **Edge cases**: Nested lists, missing H1s, deeply nested headings
+- **Framework integration**: Selector-based targeting, custom prefixes
+
+### Accessibility Validation
+
+The primary validation method in our tests is axe-core's `heading-order` rule:
+
+```javascript
+// Test pattern used throughout our test suite
+const resultsBefore = await axe.run(container, {
+    rules: { 'heading-order': { enabled: true } }
+});
+expect(resultsBefore.violations.length).toBeGreaterThan(0); // Bad structure fails
+
+healHeadings(container);
+
+const resultsAfter = await axe.run(container, {
+    rules: { 'heading-order': { enabled: true } }
+});
+expect(resultsAfter.violations.length).toBe(0); // Fixed structure passes
+```
+
 ## Debugging
 
 Enable logging to see what changes are made:
@@ -379,8 +399,8 @@ Output example:
 Found 5 heading(s) to process after H1
 Will change H4 → H2
 Will change H6 → H3
-Replaced H4 with H2, added fs-4 class
-Replaced H6 with H3, added fs-6 class
+Replaced H4 with H2, added hs-4 class
+Replaced H6 with H3, added hs-6 class
 Heading structure fix complete. Modified 2 heading(s)
 ```
 

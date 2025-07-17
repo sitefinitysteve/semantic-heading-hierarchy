@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { healHeadings } from '../src/index.js';
 import { loadFixture, createTestContainer, cleanupContainer, countHeadingsByLevel, analyzeHeadings } from './test-utils.js';
+import axe from 'axe-core';
 
 describe('healHeadings with Complex HTML Fixtures', () => {
     let container;
@@ -15,19 +16,32 @@ describe('healHeadings with Complex HTML Fixtures', () => {
             container = createTestContainer(html);
         });
 
-        it('should handle complex blog post structure with proper hierarchy correction', () => {
-            const beforeAnalysis = analyzeHeadings(container);
+        it('should handle complex blog post structure with proper hierarchy correction', async () => {
+            // Primary validation: Complex structure should fail axe-core before healing
+            const resultsBefore = await axe.run(container, {
+                rules: { 'heading-order': { enabled: true } }
+            });
+            const violationsBefore = resultsBefore.violations.filter(v => v.id === 'heading-order');
+            expect(violationsBefore.length).toBeGreaterThan(0);
+            
             const beforeCounts = countHeadingsByLevel(container);
             
             healHeadings(container);
             
-            const afterAnalysis = analyzeHeadings(container);
+            // Primary validation: axe-core accessibility testing
+            // Note: Complex fixtures may still have violations due to intentionally preserved list headings
+            const resultsAfter = await axe.run(container, {
+                rules: { 'heading-order': { enabled: true } }
+            });
+            const violationsAfter = resultsAfter.violations.filter(v => v.id === 'heading-order');
+            expect(violationsAfter.length).toBeLessThanOrEqual(violationsBefore.length);
+
             const afterCounts = countHeadingsByLevel(container);
 
             // H1s should never be modified
             expect(afterCounts.h1).toBe(beforeCounts.h1);
             
-            // Should have created H2 and H3 headings from improper levels
+            // Should have created proper hierarchy with styling classes
             expect(afterCounts.h2).toBeGreaterThan(beforeCounts.h2);
             expect(afterCounts.h3).toBeGreaterThan(beforeCounts.h3);
             
@@ -37,13 +51,13 @@ describe('healHeadings with Complex HTML Fixtures', () => {
             const totalHighLevelAfter = afterCounts.h4 + afterCounts.h5 + afterCounts.h6;
             expect(totalHighLevelAfter).toBeLessThanOrEqual(totalHighLevelBefore);
 
-            // Check that modified headings have proper attributes
-            const modifiedHeadings = afterAnalysis.filter(h => h.hasDataPrevHeading);
+            // Verify that healings created modified headings with correct attributes
+            const modifiedHeadings = container.querySelectorAll('[data-prev-heading]');
             expect(modifiedHeadings.length).toBeGreaterThan(0);
             
             modifiedHeadings.forEach(heading => {
-                expect(heading.hasHsClass).toBe(true);
-                expect(heading.dataPrevHeading).toMatch(/^[3-6]$/);
+                expect(heading.classList.toString()).toMatch(/hs-[3-6]/);
+                expect(heading.getAttribute('data-prev-heading')).toMatch(/^[3-6]$/);
             });
         });
 

@@ -296,7 +296,7 @@ describe('healHeadings - localStorage Logging Control', () => {
             const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
             healHeadings(container, { 
-                classPrefix: 'custom',
+                classPrefix: 'custom-',
                 logResults: false // Should be overridden by localStorage
             });
 

@@ -50,7 +50,7 @@ describe('healHeadings - Configurable Class Prefix', () => {
                 <h4>Section</h4>
             `;
 
-            healHeadings(container, { classPrefix: 'fs' });
+            healHeadings(container, { classPrefix: 'fs-' });
 
             const heading = container.querySelector('h2');
             expect(heading.classList.contains('fs-4')).toBe(true);
@@ -64,7 +64,7 @@ describe('healHeadings - Configurable Class Prefix', () => {
                 <h6>Deep Section</h6>
             `;
 
-            healHeadings(container, { classPrefix: 'heading' });
+            healHeadings(container, { classPrefix: 'heading-' });
 
             const heading = container.querySelector('h2');
             expect(heading.classList.contains('heading-6')).toBe(true);
@@ -78,7 +78,7 @@ describe('healHeadings - Configurable Class Prefix', () => {
                 <h6>Subsection</h6>
             `;
 
-            healHeadings(container, { classPrefix: 'style' });
+            healHeadings(container, { classPrefix: 'style-' });
 
             const h2 = container.querySelector('h2');
             const h3 = container.querySelector('h3');
@@ -110,7 +110,7 @@ describe('healHeadings - Configurable Class Prefix', () => {
             healHeadings(container, { classPrefix: 'h' });
 
             const heading = container.querySelector('h2');
-            expect(heading.classList.contains('h-4')).toBe(true);
+            expect(heading.classList.contains('h4')).toBe(true);
             expect(heading.getAttribute('data-prev-heading')).toBe('4');
         });
     });
@@ -125,7 +125,7 @@ describe('healHeadings - Configurable Class Prefix', () => {
             const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
             healHeadings(container, { 
-                classPrefix: 'custom', 
+                classPrefix: 'custom-', 
                 logResults: true 
             });
 
@@ -149,7 +149,7 @@ describe('healHeadings - Configurable Class Prefix', () => {
             const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
             healHeadings(container, { 
-                classPrefix: 'test', 
+                classPrefix: 'test-', 
                 logResults: false 
             });
 
@@ -172,7 +172,7 @@ describe('healHeadings - Configurable Class Prefix', () => {
                 <h3 class="back">Third</h3>
             `;
 
-            healHeadings(container, { classPrefix: 'level' });
+            healHeadings(container, { classPrefix: 'level-' });
 
             const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
             
@@ -210,7 +210,7 @@ describe('healHeadings - Configurable Class Prefix', () => {
                 </div>
             `;
 
-            healHeadings('.content', { classPrefix: 'content' });
+            healHeadings('.content', { classPrefix: 'content-' });
 
             // Sidebar should be unchanged
             const sidebarH3 = container.querySelector('.sidebar h3');

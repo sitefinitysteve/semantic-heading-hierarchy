@@ -8,13 +8,13 @@
 function healHeadings(containerOrSelector = document.body, options = false) {
     // Handle backwards compatibility - if options is boolean, treat as logResults
     let logResults = false;
-    let classPrefix = 'hs';
+    let classPrefix = 'hs-';
     
     if (typeof options === 'boolean') {
         logResults = options;
     } else if (typeof options === 'object' && options !== null) {
         logResults = options.logResults || false;
-        classPrefix = options.classPrefix || 'hs';
+        classPrefix = options.classPrefix || 'hs-';
     }
     
     // Check localStorage for global logging override
@@ -128,7 +128,7 @@ function healHeadings(containerOrSelector = document.body, options = false) {
             });
 
             if (logResults) {
-                console.log(`Will change ${originalTag.toUpperCase()} → H${newLevel} (will add ${classPrefix}-${originalLevel} class)`);
+                console.log(`Will change ${originalTag.toUpperCase()} → H${newLevel} (will add ${classPrefix}${originalLevel} class)`);
             }
         }
 
@@ -140,7 +140,7 @@ function healHeadings(containerOrSelector = document.body, options = false) {
         const { original, newLevel, originalLevel, originalTag } = item;
 
         // FIRST: Add visual styling class to original element to prevent FLOUT
-        original.classList.add(`${classPrefix}-${originalLevel}`);
+        original.classList.add(`${classPrefix}${originalLevel}`);
 
         // THEN: Create new heading element
         const newHeading = document.createElement(`h${newLevel}`);
@@ -160,7 +160,7 @@ function healHeadings(containerOrSelector = document.body, options = false) {
         original.parentNode.replaceChild(newHeading, original);
 
         if (logResults) {
-            console.log(`Replaced ${originalTag.toUpperCase()} with H${newLevel}, added ${classPrefix}-${originalLevel} class`);
+            console.log(`Replaced ${originalTag.toUpperCase()} with H${newLevel}, added ${classPrefix}${originalLevel} class`);
         }
     });
 
