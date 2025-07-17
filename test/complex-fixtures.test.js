@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { healHeadings } from '../src/index.js';
 import { loadFixture, createTestContainer, cleanupContainer, countHeadingsByLevel, analyzeHeadings } from './test-utils.js';
-import axe from 'axe-core';
+import { HtmlValidate } from 'html-validate';
 
 describe('healHeadings with Complex HTML Fixtures', () => {
     let container;
@@ -17,24 +17,36 @@ describe('healHeadings with Complex HTML Fixtures', () => {
         });
 
         it('should handle complex blog post structure with proper hierarchy correction', async () => {
-            // Primary validation: Complex structure should fail axe-core before healing
-            const resultsBefore = await axe.run(container, {
-                rules: { 'heading-order': { enabled: true } }
+            // Primary validation: Complex structure should fail html-validate before healing
+            const htmlvalidate = new HtmlValidate({
+                rules: { 'heading-level': 'error' }
             });
-            const violationsBefore = resultsBefore.violations.filter(v => v.id === 'heading-order');
-            expect(violationsBefore.length).toBeGreaterThan(0);
+            const reportBefore = await htmlvalidate.validateString(container.innerHTML);
+            const headingLevelErrorsBefore = reportBefore.results?.length > 0 ? reportBefore.results[0].messages.filter(m => m.ruleId === 'heading-level') : [];
+            expect(headingLevelErrorsBefore.length).toBeGreaterThan(0);
             
             const beforeCounts = countHeadingsByLevel(container);
             
             healHeadings(container);
             
-            // Primary validation: axe-core accessibility testing
-            // Note: Complex fixtures may still have violations due to intentionally preserved list headings
-            const resultsAfter = await axe.run(container, {
-                rules: { 'heading-order': { enabled: true } }
+            // Primary validation: html-validate accessibility testing
+            // Note: Complex fixtures may still have violations due to intentionally preserved:
+            // 1. Pre-H1 headings (which the healing function ignores by design)
+            // 2. Multiple H1s (which the healing function ignores by design)
+            const reportAfter = await htmlvalidate.validateString(container.innerHTML);
+            const headingLevelErrorsAfter = reportAfter.results?.length > 0 ? reportAfter.results[0].messages.filter(m => m.ruleId === 'heading-level') : [];
+            
+            // Filter out expected errors that are outside the healing function's scope
+            const filteredErrors = headingLevelErrorsAfter.filter(error => {
+                // Ignore errors about initial heading not being h1 (pre-h1 headings)
+                if (error.message.includes('Initial heading level must be <h1>')) return false;
+                // Ignore errors about multiple h1s (additional h1s are ignored by design)
+                if (error.message.includes('Multiple <h1>')) return false;
+                return true;
             });
-            const violationsAfter = resultsAfter.violations.filter(v => v.id === 'heading-order');
-            expect(violationsAfter.length).toBeLessThanOrEqual(violationsBefore.length);
+            
+            // Only expect 0 errors after filtering out the expected ones
+            expect(filteredErrors.length).toBe(0);
 
             const afterCounts = countHeadingsByLevel(container);
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { healHeadings } from '../src/index.js';
-import axe from 'axe-core';
+import { HtmlValidate } from 'html-validate';
 
 describe('healHeadings - Rigorous Core Functionality Tests', () => {
     let container;
@@ -25,20 +25,19 @@ describe('healHeadings - Rigorous Core Functionality Tests', () => {
             `;
 
             // Verify accessibility violations exist before healing
-            const resultsBefore = await axe.run(container, {
-                rules: { 'heading-order': { enabled: true } }
+            const htmlvalidate = new HtmlValidate({
+                rules: { 'heading-level': 'error' }
             });
-            const violationsBefore = resultsBefore.violations.filter(v => v.id === 'heading-order');
-            expect(violationsBefore.length).toBeGreaterThan(0);
+            const reportBefore = await htmlvalidate.validateString(container.innerHTML);
+            const headingLevelErrorsBefore = reportBefore.results?.length > 0 ? reportBefore.results[0].messages.filter(m => m.ruleId === 'heading-level') : [];
+            expect(headingLevelErrorsBefore.length).toBeGreaterThan(0);
 
             healHeadings(container);
 
-            // Primary validation: axe-core should pass after healing
-            const resultsAfter = await axe.run(container, {
-                rules: { 'heading-order': { enabled: true } }
-            });
-            const violationsAfter = resultsAfter.violations.filter(v => v.id === 'heading-order');
-            expect(violationsAfter.length).toBe(0);
+            // Primary validation: html-validate should pass after healing
+            const reportAfter = await htmlvalidate.validateString(container.innerHTML);
+            const headingLevelErrorsAfter = reportAfter.results?.length > 0 ? reportAfter.results[0].messages.filter(m => m.ruleId === 'heading-level') : [];
+            expect(headingLevelErrorsAfter.length).toBe(0);
 
             // Verify specific implementation details
             const h1 = container.querySelector('h1');
@@ -61,21 +60,20 @@ describe('healHeadings - Rigorous Core Functionality Tests', () => {
                 <h2>Second Section</h2>
             `;
 
-            // Verify bad heading structure fails axe-core before healing
-            const resultsBefore = await axe.run(container, {
-                rules: { 'heading-order': { enabled: true } }
+            // Verify bad heading structure fails html-validate before healing
+            const htmlvalidate = new HtmlValidate({
+                rules: { 'heading-level': 'error' }
             });
-            const violationsBefore = resultsBefore.violations.filter(v => v.id === 'heading-order');
-            expect(violationsBefore.length).toBeGreaterThan(0);
+            const reportBefore = await htmlvalidate.validateString(container.innerHTML);
+            const headingLevelErrorsBefore = reportBefore.results?.length > 0 ? reportBefore.results[0].messages.filter(m => m.ruleId === 'heading-level') : [];
+            expect(headingLevelErrorsBefore.length).toBeGreaterThan(0);
 
             healHeadings(container);
 
-            // Primary validation: axe-core passes after healing
-            const resultsAfter = await axe.run(container, {
-                rules: { 'heading-order': { enabled: true } }
-            });
-            const violationsAfter = resultsAfter.violations.filter(v => v.id === 'heading-order');
-            expect(violationsAfter.length).toBe(0);
+            // Primary validation: html-validate passes after healing
+            const reportAfter = await htmlvalidate.validateString(container.innerHTML);
+            const headingLevelErrorsAfter = reportAfter.results?.length > 0 ? reportAfter.results[0].messages.filter(m => m.ruleId === 'heading-level') : [];
+            expect(headingLevelErrorsAfter.length).toBe(0);
 
             // Verify specific progression for correct visual styling
             const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
@@ -164,20 +162,19 @@ describe('healHeadings - Rigorous Core Functionality Tests', () => {
             `;
 
             // Verify violations before healing
-            const resultsBefore = await axe.run(container, {
-                rules: { 'heading-order': { enabled: true } }
+            const htmlvalidate = new HtmlValidate({
+                rules: { 'heading-level': 'error' }
             });
-            const violationsBefore = resultsBefore.violations.filter(v => v.id === 'heading-order');
-            expect(violationsBefore.length).toBeGreaterThan(0);
+            const reportBefore = await htmlvalidate.validateString(container.innerHTML);
+            const headingLevelErrorsBefore = reportBefore.results?.length > 0 ? reportBefore.results[0].messages.filter(m => m.ruleId === 'heading-level') : [];
+            expect(headingLevelErrorsBefore.length).toBeGreaterThan(0);
 
             healHeadings(container);
 
             // Verify accessibility compliance after healing
-            const resultsAfter = await axe.run(container, {
-                rules: { 'heading-order': { enabled: true } }
-            });
-            const violationsAfter = resultsAfter.violations.filter(v => v.id === 'heading-order');
-            expect(violationsAfter.length).toBe(0);
+            const reportAfter = await htmlvalidate.validateString(container.innerHTML);
+            const headingLevelErrorsAfter = reportAfter.results?.length > 0 ? reportAfter.results[0].messages.filter(m => m.ruleId === 'heading-level') : [];
+            expect(headingLevelErrorsAfter.length).toBe(0);
 
             // Verify single-item list heading was processed with correct styling
             const singleHeading = container.querySelector('li h2');
