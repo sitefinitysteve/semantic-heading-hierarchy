@@ -380,7 +380,108 @@ This package uses [html-validate](https://www.npmjs.com/package/html-validate) w
 
 ## Contributing
 
-Contributions are welcome! Please read our contributing guidelines and submit pull requests to our GitHub repository.
+Contributions are welcome! Here's how to get started:
+
+### Development Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/sitefinitysteve/semantic-heading-hierarchy.git
+   cd semantic-heading-hierarchy
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Run the development commands:**
+   ```bash
+   # Run tests
+   npm test
+
+   # Run tests in watch mode
+   npm test -- --watch
+
+   # Run specific test file
+   npm test -- test/healer.test.js
+
+   # Type check
+   npm run typecheck
+
+   # Build the package
+   npm run build
+
+   # Lint the code
+   npm run lint
+
+   # Format the code
+   npm run format
+   ```
+
+### Project Structure
+
+```
+semantic-heading-hierarchy/
+├── src/
+│   ├── index.ts          # Main entry point
+│   ├── core.ts           # Core healing logic
+│   ├── logging.ts        # Logging functionality
+│   └── types.ts          # TypeScript interfaces
+├── test/
+│   ├── healer.test.js    # Basic functionality tests
+│   ├── rigorous-healer.test.js  # Comprehensive tests
+│   ├── complex-fixtures.test.js # Real-world scenarios
+│   └── fixtures/         # Test HTML fixtures
+├── dist/                 # Built files (generated)
+├── package.json          # Package configuration
+├── tsconfig.json         # TypeScript configuration
+└── README.md             # This file
+```
+
+### Testing
+
+The project uses [Vitest](https://vitest.dev/) for testing and [html-validate](https://www.npmjs.com/package/html-validate) for accessibility validation:
+
+- **91+ comprehensive tests** covering all functionality
+- **html-validate integration** ensures real accessibility compliance
+- **Complex real-world scenarios** with Bootstrap, CMSs, and documentation sites
+- **Edge case testing** for nested lists, missing H1s, and malformed HTML
+
+### Making Changes
+
+1. **Create a feature branch:**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Make your changes and add tests:**
+   - Follow the existing code style
+   - Add tests for new functionality
+   - Update documentation if needed
+
+3. **Run the test suite:**
+   ```bash
+   npm test
+   ```
+
+4. **Build and verify:**
+   ```bash
+   npm run build
+   npm run typecheck
+   ```
+
+5. **Submit a pull request:**
+   - Describe your changes clearly
+   - Include tests for new features
+   - Update README if needed
+
+### Code Style
+
+- **TypeScript** for type safety
+- **ESM modules** with CJS compatibility
+- **Comprehensive testing** with html-validate
+- **Clear documentation** with examples
 
 ## License
 
