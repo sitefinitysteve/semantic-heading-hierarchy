@@ -1,0 +1,546 @@
+<div class="page-wrapper">
+    <!-- Top Navigation -->
+    <header class="site-header">
+        <nav class="top-nav">
+            <div class="nav-brand">
+                <h2>Knowledge Base</h2>
+            </div>
+            <div class="nav-menu">
+                <h4>Documentation</h4>
+                <h4>Tutorials</h4>
+                <h4>API Reference</h4>
+            </div>
+        </nav>
+    </header>
+
+    <div class="main-layout">
+        <!-- Left Sidebar - Should NOT be processed -->
+        <aside class="left-sidebar">
+            <div class="sidebar-section">
+                <h3>Getting Started</h3>
+                <nav class="sidebar-nav">
+                    <ul class="nav-list">
+                        <li>
+                            <h4>Installation</h4>
+                            <ul class="sub-nav">
+                                <li><h5>npm install</h5></li>
+                                <li><h5>yarn install</h5></li>
+                                <li><h5>CDN usage</h5></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <h4>Quick Start</h4>
+                            <ul class="sub-nav">
+                                <li><h5>Basic setup</h5></li>
+                                <li><h5>Configuration</h5></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <h4>Examples</h4>
+                            <ul class="sub-nav">
+                                <li><h5>Hello World</h5></li>
+                                <li><h5>Advanced usage</h5></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>API Reference</h3>
+                <nav class="api-nav">
+                    <ul class="api-list">
+                        <li>
+                            <h4>Core Functions</h4>
+                            <ul class="function-list">
+                                <li><h6>initialize()</h6></li>
+                                <li><h6>configure()</h6></li>
+                                <li><h6>destroy()</h6></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <h4>Utility Functions</h4>
+                            <ul class="function-list">
+                                <li><h6>validate()</h6></li>
+                                <li><h6>transform()</h6></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Advanced Topics</h3>
+                <ul class="topic-list">
+                    <li>
+                        <h5>Performance Optimization</h5>
+                        <p>Tips for improving application speed</p>
+                    </li>
+                    <li>
+                        <h5>Custom Plugins</h5>
+                        <p>Creating and integrating custom functionality</p>
+                    </li>
+                    <li>
+                        <h5>Troubleshooting</h5>
+                        <p>Common issues and solutions</p>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Widget with different structure -->
+            <div class="sidebar-widget">
+                <h2>Recent Updates</h2>
+                <div class="update-list">
+                    <div class="update-item">
+                        <h6>Version 2.1.0 Released</h6>
+                        <p>New features and bug fixes</p>
+                        <small>March 15, 2024</small>
+                    </div>
+                    <div class="update-item">
+                        <h6>Security Patch 2.0.3</h6>
+                        <p>Important security improvements</p>
+                        <small>March 10, 2024</small>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area - SHOULD be processed -->
+        <main class="content-area">
+            <div class="content-wrapper">
+                <article class="documentation-article">
+                    <header class="article-header">
+                        <h1>Advanced Configuration Guide</h1>
+                        <div class="article-meta">
+                            <span class="last-updated">Last updated: March 20, 2024</span>
+                            <span class="reading-time">15 min read</span>
+                        </div>
+                    </header>
+
+                    <!-- Article sections with improper hierarchy -->
+                    <section class="config-overview">
+                        <h5>Configuration Overview</h5>
+                        <p>This guide covers advanced configuration options for power users and developers who need fine-grained control over the application behavior.</p>
+
+                        <!-- Nested configuration sections -->
+                        <div class="config-categories">
+                            <div class="config-category">
+                                <h6>Environment Settings</h6>
+                                <p>Configure the application for different deployment environments.</p>
+
+                                <!-- Environment types -->
+                                <div class="env-types">
+                                    <h4>Development Environment</h4>
+                                    <p>Settings optimized for local development and debugging.</p>
+
+                                    <!-- Dev config details -->
+                                    <div class="dev-config">
+                                        <h6>Debug Options</h6>
+                                        <ul class="debug-options">
+                                            <li>
+                                                <h5>Verbose Logging</h5>
+                                                <p>Enable detailed console output for troubleshooting</p>
+                                                <div class="config-example">
+                                                    <h6>Example Configuration</h6>
+                                                    <pre><code>
+{
+  "debug": {
+    "verbose": true,
+    "logLevel": "debug"
+  }
+}
+                                                    </code></pre>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <h5>Hot Reload</h5>
+                                                <p>Automatically refresh on code changes</p>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <h4>Production Environment</h4>
+                                    <p>Optimized settings for live deployment.</p>
+
+                                    <!-- Production config -->
+                                    <div class="prod-config">
+                                        <h6>Performance Options</h6>
+                                        <ul class="perf-options">
+                                            <li>
+                                                <h5>Minification</h5>
+                                                <p>Compress assets for faster loading</p>
+                                            </li>
+                                            <li>
+                                                <h5>Caching Strategy</h5>
+                                                <p>Configure browser and server-side caching</p>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="config-category">
+                                <h6>Database Configuration</h6>
+                                <p>Set up database connections and optimization.</p>
+
+                                <!-- Database types -->
+                                <div class="db-types">
+                                    <h3>Supported Databases</h3>
+
+                                    <!-- Individual database configs -->
+                                    <div class="db-config">
+                                        <h5>PostgreSQL</h5>
+                                        <p>Configuration for PostgreSQL databases.</p>
+
+                                        <!-- Connection details -->
+                                        <div class="connection-config">
+                                            <h6>Connection Pool Settings</h6>
+                                            <ul class="pool-settings">
+                                                <li>
+                                                    <h4>Max Connections</h4>
+                                                    <p>Maximum number of concurrent connections</p>
+                                                </li>
+                                                <li>
+                                                    <h4>Idle Timeout</h4>
+                                                    <p>Time before idle connections are closed</p>
+                                                </li>
+                                                <li>
+                                                    <h4>Connection Retry</h4>
+                                                    <p>Automatic retry logic for failed connections</p>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="db-config">
+                                        <h5>MongoDB</h5>
+                                        <p>NoSQL database configuration options.</p>
+
+                                        <!-- MongoDB specific settings -->
+                                        <div class="mongo-config">
+                                            <h6>Replica Set Configuration</h6>
+                                            <ul class="replica-settings">
+                                                <li>
+                                                    <h4>Primary Node</h4>
+                                                    <p>Main database server configuration</p>
+                                                </li>
+                                                <li>
+                                                    <h4>Secondary Nodes</h4>
+                                                    <p>Backup and read replica settings</p>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Authentication section -->
+                    <section class="auth-config">
+                        <h2>Authentication Configuration</h2>
+                        <p>Configure various authentication methods and security settings.</p>
+
+                        <!-- Auth methods -->
+                        <div class="auth-methods">
+                            <h4>Supported Authentication Methods</h4>
+
+                            <!-- OAuth configuration -->
+                            <div class="oauth-config">
+                                <h6>OAuth 2.0 Setup</h6>
+                                <p>Configure OAuth providers for social login.</p>
+
+                                <!-- Provider configs -->
+                                <div class="provider-configs">
+                                    <div class="provider-config">
+                                        <h5>Google OAuth</h5>
+                                        <p>Integration with Google OAuth services.</p>
+
+                                        <!-- Google specific settings -->
+                                        <div class="google-settings">
+                                            <h6>Required Configuration</h6>
+                                            <ul class="config-items">
+                                                <li>
+                                                    <h4>Client ID</h4>
+                                                    <p>Obtained from Google Developer Console</p>
+                                                </li>
+                                                <li>
+                                                    <h4>Client Secret</h4>
+                                                    <p>Secure credential for server-side requests</p>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="provider-config">
+                                        <h5>GitHub OAuth</h5>
+                                        <p>Developer-focused authentication via GitHub.</p>
+
+                                        <!-- Single config item -->
+                                        <div class="github-settings">
+                                            <ul class="config-items">
+                                                <li>
+                                                    <h4>App Registration</h4>
+                                                    <p>Register your application in GitHub Developer Settings</p>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- JWT configuration -->
+                            <div class="jwt-config">
+                                <h4>JWT Token Configuration</h4>
+                                <p>Settings for JSON Web Token authentication.</p>
+
+                                <!-- JWT settings -->
+                                <div class="jwt-settings">
+                                    <h6>Token Parameters</h6>
+                                    <ul class="token-params">
+                                        <li>
+                                            <h5>Expiration Time</h5>
+                                            <p>How long tokens remain valid</p>
+                                        </li>
+                                        <li>
+                                            <h5>Signing Algorithm</h5>
+                                            <p>Cryptographic method for token signing</p>
+                                        </li>
+                                        <li>
+                                            <h5>Refresh Strategy</h5>
+                                            <p>Automatic token renewal configuration</p>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Performance section with complex nesting -->
+                    <section class="performance-config">
+                        <h2>Performance Optimization</h2>
+                        <p>Advanced performance tuning and optimization strategies.</p>
+
+                        <!-- Performance categories -->
+                        <div class="perf-categories">
+                            <div class="perf-category">
+                                <h5>Caching Configuration</h5>
+                                <p>Multi-layer caching strategy implementation.</p>
+
+                                <!-- Cache layers -->
+                                <div class="cache-layers">
+                                    <div class="cache-layer">
+                                        <h6>Memory Cache</h6>
+                                        <p>In-memory caching for frequently accessed data.</p>
+
+                                        <!-- Memory cache config -->
+                                        <div class="memory-cache-config">
+                                            <h4>Configuration Options</h4>
+                                            <ul class="cache-options">
+                                                <li>
+                                                    <h6>Max Memory Usage</h6>
+                                                    <p>Limit cache size to prevent memory issues</p>
+                                                </li>
+                                                <li>
+                                                    <h6>TTL (Time To Live)</h6>
+                                                    <p>Automatic expiration of cached items</p>
+                                                </li>
+                                                <li>
+                                                    <h6>LRU Eviction</h6>
+                                                    <p>Remove least recently used items when full</p>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="cache-layer">
+                                        <h6>Redis Cache</h6>
+                                        <p>Distributed caching with Redis.</p>
+
+                                        <!-- Redis config -->
+                                        <div class="redis-config">
+                                            <h4>Redis Configuration</h4>
+                                            <ul class="redis-options">
+                                                <li>
+                                                    <h6>Connection String</h6>
+                                                    <p>Redis server connection details</p>
+                                                </li>
+                                                <li>
+                                                    <h6>Cluster Mode</h6>
+                                                    <p>Enable Redis clustering for high availability</p>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="perf-category">
+                                <h5>Database Optimization</h5>
+                                <p>Query optimization and database performance tuning.</p>
+
+                                <!-- DB optimization strategies -->
+                                <div class="db-optimization">
+                                    <h6>Query Optimization</h6>
+                                    <ul class="optimization-strategies">
+                                        <li>
+                                            <h4>Index Strategy</h4>
+                                            <p>Proper indexing for faster queries</p>
+                                        </li>
+                                        <li>
+                                            <h4>Query Analysis</h4>
+                                            <p>Identify and optimize slow queries</p>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Monitoring section -->
+                    <section class="monitoring-config">
+                        <h3>Monitoring and Logging</h3>
+                        <p>Set up comprehensive monitoring and logging systems.</p>
+
+                        <!-- Monitoring tools -->
+                        <div class="monitoring-tools">
+                            <h5>Application Monitoring</h5>
+
+                            <!-- Tool configurations -->
+                            <div class="tool-configs">
+                                <div class="tool-config">
+                                    <h6>Metrics Collection</h6>
+                                    <p>Gather performance and usage metrics.</p>
+
+                                    <!-- Metrics types -->
+                                    <div class="metrics-types">
+                                        <ul class="metric-categories">
+                                            <li>
+                                                <h4>Response Time Metrics</h4>
+                                                <p>Track API and page load times</p>
+                                            </li>
+                                            <li>
+                                                <h4>Error Rate Monitoring</h4>
+                                                <p>Monitor application error frequency</p>
+                                            </li>
+                                            <li>
+                                                <h4>Resource Usage</h4>
+                                                <p>CPU, memory, and disk utilization</p>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="tool-config">
+                                    <h6>Log Aggregation</h6>
+                                    <p>Centralized logging for easier debugging.</p>
+
+                                    <!-- Single logging config -->
+                                    <div class="logging-config">
+                                        <ul class="log-settings">
+                                            <li>
+                                                <h4>Log Level Configuration</h4>
+                                                <p>Control verbosity of application logs</p>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Deployment section -->
+                    <section class="deployment-config">
+                        <h2>Deployment Configuration</h2>
+                        <p>Settings for different deployment scenarios and environments.</p>
+
+                        <h4>Container Deployment</h4>
+                        <p>Docker and Kubernetes configuration options.</p>
+
+                        <h6>Docker Configuration</h6>
+                        <p>Optimize container settings for production deployment.</p>
+
+                        <h5>Kubernetes Setup</h5>
+                        <p>Orchestration and scaling configuration.</p>
+                    </section>
+                </article>
+
+                <!-- Related documentation -->
+                <aside class="content-sidebar">
+                    <div class="related-docs">
+                        <h3>Related Documentation</h3>
+                        <ul class="related-list">
+                            <li>
+                                <h5>API Reference</h5>
+                                <p>Complete API documentation</p>
+                            </li>
+                            <li>
+                                <h5>Troubleshooting Guide</h5>
+                                <p>Common issues and solutions</p>
+                            </li>
+                            <li>
+                                <h5>Best Practices</h5>
+                                <p>Recommended patterns and approaches</p>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="help-section">
+                        <h3>Need Help?</h3>
+                        <h5>Community Support</h5>
+                        <p>Join our community forum for help and discussions.</p>
+                        
+                        <h5>Professional Support</h5>
+                        <p>Get dedicated support for enterprise customers.</p>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- Right Sidebar - Should NOT be processed -->
+        <aside class="right-sidebar">
+            <div class="sidebar-widget">
+                <h3>Table of Contents</h3>
+                <nav class="toc-nav">
+                    <ul class="toc-list">
+                        <li>
+                            <h5>Configuration Overview</h5>
+                            <ul class="toc-sub">
+                                <li><h6>Environment Settings</h6></li>
+                                <li><h6>Database Configuration</h6></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <h5>Authentication</h5>
+                            <ul class="toc-sub">
+                                <li><h6>OAuth Setup</h6></li>
+                                <li><h6>JWT Configuration</h6></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <h5>Performance</h5>
+                            <ul class="toc-sub">
+                                <li><h6>Caching</h6></li>
+                                <li><h6>Database Optimization</h6></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="sidebar-widget">
+                <h3>Quick Actions</h3>
+                <ul class="action-list">
+                    <li>
+                        <h6>Download Config Template</h6>
+                        <p>Get started with a sample configuration file</p>
+                    </li>
+                    <li>
+                        <h6>Validate Configuration</h6>
+                        <p>Check your config for errors</p>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+</div>

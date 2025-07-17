@@ -1,0 +1,395 @@
+<div class="container-fluid">
+    <!-- Bootstrap Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <h2 class="navbar-brand">TechBlog</h2>
+            <div class="navbar-nav">
+                <h4 class="nav-link">Categories</h4>
+                <h4 class="nav-link">About</h4>
+                <h4 class="nav-link">Contact</h4>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero bg-primary text-white py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h3>Welcome to Our Technology Blog</h3>
+                    <p class="lead">Discover the latest trends in web development</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <main class="main-content py-5">
+        <div class="container">
+            <div class="row">
+                <!-- Sidebar -->
+                <aside class="col-lg-3 sidebar">
+                    <div class="sidebar-widget mb-4">
+                        <h3>Recent Posts</h3>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <h5>Understanding React Hooks</h5>
+                                <small class="text-muted">March 15, 2024</small>
+                            </li>
+                            <li class="mb-2">
+                                <h5>CSS Grid vs Flexbox</h5>
+                                <small class="text-muted">March 10, 2024</small>
+                            </li>
+                            <li class="mb-2">
+                                <h5>JavaScript ES2024 Features</h5>
+                                <small class="text-muted">March 5, 2024</small>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="sidebar-widget mb-4">
+                        <h3>Categories</h3>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <h6>JavaScript</h6>
+                                <span class="badge bg-primary">12</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <h6>CSS</h6>
+                                <span class="badge bg-primary">8</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <h6>React</h6>
+                                <span class="badge bg-primary">15</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="sidebar-widget">
+                        <h3>Newsletter</h3>
+                        <h5>Stay Updated</h5>
+                        <p>Subscribe to get the latest posts delivered to your inbox.</p>
+                    </div>
+                </aside>
+
+                <!-- Article Content -->
+                <div class="col-lg-9 article-content">
+                    <article class="blog-post">
+                        <header class="post-header mb-4">
+                            <h1>Advanced JavaScript Patterns for Modern Web Development</h1>
+                            <div class="post-meta">
+                                <span class="author">By John Doe</span>
+                                <span class="date">March 20, 2024</span>
+                                <span class="read-time">8 min read</span>
+                            </div>
+                        </header>
+
+                        <!-- Introduction with improper hierarchy -->
+                        <section class="post-intro">
+                            <h5>Introduction to Modern JavaScript</h5>
+                            <p>JavaScript has evolved tremendously over the past decade, introducing powerful patterns and paradigms that enable developers to write more maintainable and efficient code.</p>
+                        </section>
+
+                        <!-- Pattern Categories -->
+                        <div class="row pattern-categories">
+                            <div class="col-md-6">
+                                <div class="pattern-card card h-100">
+                                    <div class="card-body">
+                                        <h6>Design Patterns</h6>
+                                        <p>Reusable solutions to common programming problems</p>
+                                        
+                                        <!-- Nested pattern examples -->
+                                        <div class="pattern-examples">
+                                            <h4>Module Pattern</h4>
+                                            <p>Encapsulation and organization of code</p>
+                                            
+                                            <!-- Code example with complex nesting -->
+                                            <div class="code-block">
+                                                <h6>Implementation</h6>
+                                                <pre><code>
+const MyModule = (function() {
+    let privateVar = 0;
+    
+    return {
+                                                </code></pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="pattern-card card h-100">
+                                    <div class="card-body">
+                                        <h6>Functional Patterns</h6>
+                                        <p>Leveraging functional programming concepts</p>
+                                        
+                                        <div class="pattern-examples">
+                                            <h4>Higher-Order Functions</h4>
+                                            <p>Functions that operate on other functions</p>
+                                            
+                                            <!-- Nested examples -->
+                                            <div class="examples-list">
+                                                <ul class="feature-list">
+                                                    <li>
+                                                        <h5>Array Methods</h5>
+                                                        <p>map, filter, reduce for data transformation</p>
+                                                    </li>
+                                                    <li>
+                                                        <h5>Function Composition</h5>
+                                                        <p>Combining simple functions to build complex operations</p>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detailed Sections with Bootstrap Grid -->
+                        <section class="detailed-patterns mt-5">
+                            <h2>Deep Dive into Specific Patterns</h2>
+                            
+                            <!-- Observer Pattern Section -->
+                            <div class="row pattern-detail mb-5">
+                                <div class="col-lg-8">
+                                    <h5>Observer Pattern</h5>
+                                    <p>The Observer pattern defines a one-to-many dependency between objects.</p>
+                                    
+                                    <!-- Implementation details -->
+                                    <h6>Key Components</h6>
+                                    <div class="row components">
+                                        <div class="col-sm-6">
+                                            <div class="component-card">
+                                                <h4>Subject</h4>
+                                                <p>Maintains list of observers and notifies them of changes</p>
+                                                
+                                                <!-- Nested method details -->
+                                                <ul class="method-list">
+                                                    <li>
+                                                        <h6>subscribe()</h6>
+                                                        <p>Add observer to the list</p>
+                                                    </li>
+                                                    <li>
+                                                        <h6>unsubscribe()</h6>
+                                                        <p>Remove observer from the list</p>
+                                                    </li>
+                                                    <li>
+                                                        <h6>notify()</h6>
+                                                        <p>Alert all observers of state changes</p>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-sm-6">
+                                            <div class="component-card">
+                                                <h4>Observer</h4>
+                                                <p>Receives notifications and updates accordingly</p>
+                                                
+                                                <!-- Single method in list -->
+                                                <ul class="method-list">
+                                                    <li>
+                                                        <h6>update()</h6>
+                                                        <p>Called when subject state changes</p>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-lg-4">
+                                    <div class="sidebar-info">
+                                        <h4>Use Cases</h4>
+                                        <ul class="use-case-list">
+                                            <li>
+                                                <h6>Event Systems</h6>
+                                                <p>DOM events, custom application events</p>
+                                            </li>
+                                            <li>
+                                                <h6>State Management</h6>
+                                                <p>Redux, MobX, and other state libraries</p>
+                                            </li>
+                                            <li>
+                                                <h6>Model-View Architectures</h6>
+                                                <p>MVC, MVP, MVVM patterns</p>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Promise Pattern Section -->
+                            <div class="row pattern-detail mb-5">
+                                <div class="col-12">
+                                    <h3>Promise and Async Patterns</h3>
+                                    <p>Modern JavaScript async programming patterns for handling asynchronous operations.</p>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="async-pattern">
+                                        <h5>Basic Promises</h5>
+                                        <p>Foundation for asynchronous programming</p>
+                                        
+                                        <!-- Promise methods -->
+                                        <div class="promise-methods">
+                                            <h6>Core Methods</h6>
+                                            <ul class="method-list">
+                                                <li>
+                                                    <h4>then()</h4>
+                                                    <p>Handle successful resolution</p>
+                                                </li>
+                                                <li>
+                                                    <h4>catch()</h4>
+                                                    <p>Handle rejection or errors</p>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="async-pattern">
+                                        <h5>Async/Await</h5>
+                                        <p>Syntactic sugar for working with promises</p>
+                                        
+                                        <div class="async-benefits">
+                                            <h6>Benefits</h6>
+                                            <ul class="benefit-list">
+                                                <li>
+                                                    <h4>Readability</h4>
+                                                    <p>Synchronous-looking asynchronous code</p>
+                                                </li>
+                                                <li>
+                                                    <h4>Error Handling</h4>
+                                                    <p>Use try/catch with async operations</p>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <div class="async-pattern">
+                                        <h5>Advanced Patterns</h5>
+                                        <p>Complex async scenarios and solutions</p>
+                                        
+                                        <!-- Single advanced pattern -->
+                                        <div class="advanced-list">
+                                            <ul class="pattern-list">
+                                                <li>
+                                                    <h4>Promise.all() Coordination</h4>
+                                                    <p>Execute multiple async operations in parallel</p>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Performance Considerations -->
+                        <section class="performance-section">
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <h2>Performance Considerations</h2>
+                                    
+                                    <h6>Memory Management</h6>
+                                    <p>Proper handling of memory to prevent leaks and optimize performance.</p>
+                                    
+                                    <!-- Performance topics -->
+                                    <div class="performance-topics">
+                                        <h4>Key Areas to Monitor</h4>
+                                        
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <h6>Memory Leaks</h6>
+                                                <p>Common causes and prevention strategies</p>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <h6>Event Listeners</h6>
+                                                <p>Proper cleanup and management</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-lg-4">
+                                    <div class="performance-tips">
+                                        <h3>Quick Tips</h3>
+                                        <ul class="tip-list">
+                                            <li>
+                                                <h5>Use WeakMap for private data</h5>
+                                                <p>Prevents memory leaks in class instances</p>
+                                            </li>
+                                            <li>
+                                                <h5>Debounce expensive operations</h5>
+                                                <p>Reduce frequency of intensive calculations</p>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Conclusion -->
+                        <footer class="post-conclusion mt-5">
+                            <h2>Conclusion</h2>
+                            <p>These patterns form the foundation of modern JavaScript development.</p>
+                            
+                            <h4>Next Steps</h4>
+                            <p>Continue exploring advanced patterns and apply them in your projects.</p>
+                        </footer>
+                    </article>
+
+                    <!-- Related Articles -->
+                    <section class="related-articles mt-5">
+                        <h2>Related Articles</h2>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">React Design Patterns</h5>
+                                        <h6 class="card-subtitle mb-2 text-muted">Component Architecture</h6>
+                                        <p class="card-text">Explore common patterns for building React applications.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">TypeScript Best Practices</h5>
+                                        <h6 class="card-subtitle mb-2 text-muted">Type Safety</h6>
+                                        <p class="card-text">Learn how to leverage TypeScript for better code quality.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>TechBlog</h4>
+                    <p>Your source for web development insights</p>
+                </div>
+                <div class="col-md-6">
+                    <h4>Quick Links</h4>
+                    <ul class="list-unstyled">
+                        <li><h6>Privacy Policy</h6></li>
+                        <li><h6>Terms of Service</h6></li>
+                        <li><h6>Contact Us</h6></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>

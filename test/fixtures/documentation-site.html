@@ -1,0 +1,269 @@
+<div class="documentation-site">
+    <!-- Site header -->
+    <header class="site-header">
+        <h2>Documentation Portal</h2>
+        <nav class="breadcrumb">
+            <h4>Home</h4>
+            <h4>API Reference</h4>
+            <h4>Authentication</h4>
+        </nav>
+    </header>
+
+    <!-- Sidebar navigation -->
+    <aside class="sidebar">
+        <h3>Table of Contents</h3>
+        <h4>Getting Started</h4>
+        <h4>API Reference</h4>
+        <h4>Examples</h4>
+    </aside>
+
+    <!-- Main documentation content -->
+    <main class="docs-content">
+        <h1>API Authentication Guide</h1>
+        
+        <!-- Overview with level jumping -->
+        <h6>Overview</h6>
+        <p>This guide covers all authentication methods supported by our API.</p>
+
+        <!-- Authentication methods -->
+        <h5>Authentication Methods</h5>
+        <p>We support multiple authentication approaches to fit different use cases.</p>
+
+        <!-- API Key authentication -->
+        <h6>API Key Authentication</h6>
+        <p>The simplest method for server-to-server communication.</p>
+
+        <!-- Code examples in nested structure -->
+        <div class="code-examples">
+            <h5>Implementation Examples</h5>
+            
+            <!-- Language-specific examples -->
+            <ul class="language-tabs">
+                <li>
+                    <h6>JavaScript</h6>
+                    <pre><code>
+const apiKey = 'your-api-key';
+fetch('/api/data', {
+    headers: {
+        'Authorization': `Bearer ${apiKey}`
+    }
+});
+                    </code></pre>
+                </li>
+                <li>
+                    <h6>Python</h6>
+                    <pre><code>
+import requests
+
+headers = {'Authorization': 'Bearer your-api-key'}
+response = requests.get('/api/data', headers=headers)
+                    </code></pre>
+                </li>
+                <li>
+                    <h6>cURL</h6>
+                    <pre><code>
+curl -H "Authorization: Bearer your-api-key" \
+     https://api.example.com/data
+                    </code></pre>
+                </li>
+            </ul>
+        </div>
+
+        <!-- OAuth 2.0 section -->
+        <h3>OAuth 2.0 Authentication</h3>
+        <p>For applications that need to act on behalf of users.</p>
+
+        <!-- OAuth flows -->
+        <h5>Supported Flows</h5>
+
+        <!-- Authorization Code Flow -->
+        <h6>Authorization Code Flow</h6>
+        <p>Recommended for server-side applications with a backend.</p>
+
+        <!-- Detailed steps -->
+        <ol class="oauth-steps">
+            <li>
+                <h5>Redirect to Authorization Server</h5>
+                <p>Send user to the authorization endpoint with required parameters.</p>
+                
+                <!-- Sub-steps -->
+                <ul class="sub-steps">
+                    <li>
+                        <h6>Required Parameters</h6>
+                        <ul>
+                            <li>client_id: Your application's client ID</li>
+                            <li>response_type: Set to "code"</li>
+                            <li>redirect_uri: Where to send the user after authorization</li>
+                            <li>scope: Requested permissions</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <h5>Handle Authorization Response</h5>
+                <p>Process the authorization code returned to your redirect URI.</p>
+            </li>
+            <li>
+                <h5>Exchange Code for Token</h5>
+                <p>Make a server-side request to exchange the code for an access token.</p>
+            </li>
+        </ol>
+
+        <!-- Single item list with complex content -->
+        <div class="security-note">
+            <ul class="important-notes">
+                <li>
+                    <h4>Security Considerations</h4>
+                    <p>Always validate the state parameter to prevent CSRF attacks.</p>
+                    
+                    <!-- Nested security topics -->
+                    <ul class="security-topics">
+                        <li>
+                            <h5>PKCE (Proof Key for Code Exchange)</h5>
+                            <p>Recommended for mobile and SPA applications.</p>
+                        </li>
+                        <li>
+                            <h5>Token Storage</h5>
+                            <p>Store access tokens securely and never expose them in client-side code.</p>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <!-- JWT Tokens section -->
+        <h2>JWT Token Format</h2>
+        <p>Our API uses JSON Web Tokens for secure information transmission.</p>
+
+        <!-- Token structure -->
+        <h4>Token Structure</h4>
+
+        <!-- JWT parts -->
+        <h6>Header</h6>
+        <p>Contains the token type and signing algorithm.</p>
+
+        <h6>Payload</h6>
+        <p>Contains the claims (user info, permissions, expiration).</p>
+
+        <h6>Signature</h6>
+        <p>Ensures the token hasn't been tampered with.</p>
+
+        <!-- Claims documentation -->
+        <h3>Standard Claims</h3>
+
+        <!-- Claim types -->
+        <h5>Required Claims</h5>
+        
+        <!-- Individual claims -->
+        <h6>iss (Issuer)</h6>
+        <p>Identifies the principal that issued the JWT.</p>
+
+        <h6>exp (Expiration Time)</h6>
+        <p>Timestamp when the token expires.</p>
+
+        <h6>iat (Issued At)</h6>
+        <p>Timestamp when the token was issued.</p>
+
+        <!-- Custom claims section -->
+        <h4>Custom Claims</h4>
+
+        <!-- Application-specific claims -->
+        <h6>user_id</h6>
+        <p>Unique identifier for the authenticated user.</p>
+
+        <h6>permissions</h6>
+        <p>Array of permission strings granted to the user.</p>
+
+        <!-- Error handling section -->
+        <h2>Error Handling</h2>
+
+        <!-- Common errors -->
+        <h4>Authentication Errors</h4>
+
+        <!-- Error codes with improper hierarchy -->
+        <h6>401 Unauthorized</h6>
+        <p>Invalid or missing authentication credentials.</p>
+
+        <h6>403 Forbidden</h6>
+        <p>Valid credentials but insufficient permissions.</p>
+
+        <h6>429 Too Many Requests</h6>
+        <p>Rate limit exceeded for the current time window.</p>
+
+        <!-- Another H1 (should be ignored) -->
+        <h1>Related Documentation</h1>
+
+        <!-- Rate limiting section continuing from previous context -->
+        <h3>Rate Limiting</h3>
+        <p>API requests are subject to rate limiting to ensure fair usage.</p>
+
+        <h5>Rate Limit Headers</h5>
+        <p>Response headers provide information about current rate limit status.</p>
+
+        <!-- Header examples -->
+        <ul class="header-examples">
+            <li>
+                <h6>X-RateLimit-Limit</h6>
+                <p>The maximum number of requests allowed in the time window.</p>
+            </li>
+            <li>
+                <h6>X-RateLimit-Remaining</h6>
+                <p>The number of requests remaining in the current window.</p>
+            </li>
+            <li>
+                <h6>X-RateLimit-Reset</h6>
+                <p>Timestamp when the rate limit window resets.</p>
+            </li>
+        </ul>
+
+        <!-- Best practices -->
+        <h3>Best Practices</h3>
+
+        <!-- Practice categories -->
+        <h6>Token Management</h6>
+        <p>Implement proper token lifecycle management.</p>
+
+        <h5>Refresh Tokens</h5>
+        <p>Use refresh tokens to maintain long-term access without re-authentication.</p>
+
+        <h6>Token Rotation</h6>
+        <p>Regularly rotate API keys and refresh tokens for enhanced security.</p>
+
+        <!-- Testing section -->
+        <h4>Testing Authentication</h4>
+
+        <!-- Testing environments -->
+        <h6>Sandbox Environment</h6>
+        <p>Use our sandbox API for testing without affecting production data.</p>
+
+        <!-- Testing tools -->
+        <h5>Recommended Tools</h5>
+
+        <!-- Tool list -->
+        <ol class="testing-tools">
+            <li>
+                <h6>Postman</h6>
+                <p>Popular API testing tool with OAuth 2.0 support.</p>
+            </li>
+            <li>
+                <h6>curl</h6>
+                <p>Command-line tool for making HTTP requests.</p>
+            </li>
+        </ol>
+
+        <!-- Support section -->
+        <h2>Getting Help</h2>
+
+        <h4>Support Channels</h4>
+        <p>Multiple ways to get assistance with authentication issues.</p>
+
+        <h6>Documentation</h6>
+        <p>Comprehensive guides and API reference documentation.</p>
+
+        <h6>Community Forum</h6>
+        <p>Connect with other developers and get answers to common questions.</p>
+
+        <h6>Direct Support</h6>
+        <p>Contact our technical support team for complex issues.</p>
+    </main>
+</div>

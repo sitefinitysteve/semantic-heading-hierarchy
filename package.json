@@ -1,0 +1,62 @@
+{
+  "name": "semantic-heading-hierarchy",
+  "version": "1.0.0",
+  "description": "A JavaScript library that automatically corrects improper heading hierarchies for better accessibility and SEO",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "npm run build:esm && npm run build:cjs",
+    "build:esm": "esbuild src/index.js --bundle --format=esm --outfile=dist/index.js",
+    "build:cjs": "esbuild src/index.js --bundle --format=cjs --outfile=dist/index.cjs",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "lint": "eslint src/",
+    "format": "prettier --write src/ test/"
+  },
+  "keywords": [
+    "heading",
+    "hierarchy",
+    "accessibility",
+    "a11y",
+    "seo",
+    "semantic",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6"
+  ],
+  "author": "Steve McNiven-Scott",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sitefinitysteve/semantic-heading-hierarchy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sitefinitysteve/semantic-heading-hierarchy/issues"
+  },
+  "homepage": "https://github.com/sitefinitysteve/semantic-heading-hierarchy#readme",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "axe-core": "^4.10.3",
+    "esbuild": "^0.25.6",
+    "eslint": "^9.31.0",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.6.2",
+    "vitest": "^3.2.4"
+  }
+}
