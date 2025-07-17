@@ -104,9 +104,25 @@ SemanticHeadingHierarchy.fix('.content', {
 
 ### Example Transformation
 
-| Before | After |
-|--------|-------|
-| ```html<br><article><br>    <h1>Main Article Title</h1><br>    <h4>Introduction</h4>         <!-- Skips H2, H3 levels --><br>    <h6>Key Points</h6>           <!-- Skips H5 level --><br>    <h2>Conclusion</h2>           <!-- Jumps back to H2 --><br></article><br>``` | ```html<br><article><br>    <h1>Main Article Title</h1>   <!-- Untouched --><br>    <h2 class="hs-4" data-prev-heading="4">Introduction</h2>     <!-- Corrected, styled as H4 --><br>    <h3 class="hs-6" data-prev-heading="6">Key Points</h3>       <!-- Corrected, styled as H6 --><br>    <h2>Conclusion</h2>           <!-- Already correct --><br></article><br>``` |
+**Before:**
+```html
+<article>
+    <h1>Main Article Title</h1>
+    <h4>Introduction</h4>         <!-- Skips H2, H3 levels -->
+    <h6>Key Points</h6>           <!-- Skips H5 level -->
+    <h2>Conclusion</h2>           <!-- Jumps back to H2 -->
+</article>
+```
+
+**After:**
+```html
+<article>
+    <h1>Main Article Title</h1>   <!-- Untouched -->
+    <h2 class="hs-4" data-prev-heading="4">Introduction</h2>     <!-- Corrected, styled as H4 -->
+    <h3 class="hs-6" data-prev-heading="6">Key Points</h3>       <!-- Corrected, styled as H6 -->
+    <h2>Conclusion</h2>           <!-- Already correct -->
+</article>
+```
 
 ### Custom Class Prefix
 
@@ -180,9 +196,17 @@ The library prevents visual layout disruption by adding styling classes **before
 
 ### Before & After Correction
 
-| Before | After |
-|--------|-------|
-| ```html<br><h1>Main Title</h1><br><h4>Section Title</h4>  <!-- Wrong level, but styled as h4 --><br>``` | ```html<br><h1>Main Title</h1><br><h2 class="hs-4" data-prev-heading="4">Section Title</h2><br>``` |
+**Before:**
+```html
+<h1>Main Title</h1>
+<h4>Section Title</h4>  <!-- Wrong level, but styled as h4 -->
+```
+
+**After:**
+```html
+<h1>Main Title</h1>
+<h2 class="hs-4" data-prev-heading="4">Section Title</h2>
+```
 
 The `hs-4` class (heading-style-4) allows you to maintain the original H4 visual styling while using the semantically correct H2 tag.
 
@@ -227,9 +251,27 @@ If you have headings before the H1 (like in navigation or headers), **the librar
 
 ### Multiple H1 Example with forceSingleH1
 
-| Before (Multiple H1s - accessibility violation) | After (with `forceSingleH1: true`) |
-|--------|-------|
-| ```html<br><article><br>    <h1>Main Article Title</h1>  <!-- First H1 - will be preserved --><br>    <h3>Section</h3>              <!-- Skips H2 --><br>    <h1>Another Main Title</h1>   <!-- Additional H1 - accessibility violation --><br>    <h4>Subsection</h4>           <!-- Skips H3 --><br>    <h1>Yet Another Title</h1>    <!-- Additional H1 - accessibility violation --><br></article><br>``` | ```html<br><article><br>    <h1>Main Article Title</h1>   <!-- First H1 preserved --><br>    <h2 class="hs-3" data-prev-heading="3">Section</h2>                    <!-- H3 → H2 --><br>    <h2 class="hs-1" data-prev-heading="1">Another Main Title</h2>         <!-- H1 → H2 --><br>    <h3 class="hs-4" data-prev-heading="4">Subsection</h3>                 <!-- H4 → H3 --><br>    <h2 class="hs-1" data-prev-heading="1">Yet Another Title</h2>          <!-- H1 → H2 --><br></article><br>``` |
+**Before (Multiple H1s - accessibility violation):**
+```html
+<article>
+    <h1>Main Article Title</h1>  <!-- First H1 - will be preserved -->
+    <h3>Section</h3>              <!-- Skips H2 -->
+    <h1>Another Main Title</h1>   <!-- Additional H1 - accessibility violation -->
+    <h4>Subsection</h4>           <!-- Skips H3 -->
+    <h1>Yet Another Title</h1>    <!-- Additional H1 - accessibility violation -->
+</article>
+```
+
+**After (with `forceSingleH1: true`):**
+```html
+<article>
+    <h1>Main Article Title</h1>   <!-- First H1 preserved -->
+    <h2 class="hs-3" data-prev-heading="3">Section</h2>                    <!-- H3 → H2 -->
+    <h2 class="hs-1" data-prev-heading="1">Another Main Title</h2>         <!-- H1 → H2 -->
+    <h3 class="hs-4" data-prev-heading="4">Subsection</h3>                 <!-- H4 → H3 -->
+    <h2 class="hs-1" data-prev-heading="1">Yet Another Title</h2>          <!-- H1 → H2 -->
+</article>
+```
 
 ## Advanced Usage
 
