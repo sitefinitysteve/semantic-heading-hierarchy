@@ -71,6 +71,8 @@ h6, .hs-6 {
 }
 ```
 
+> **Already using Bootstrap?** You can skip this section entirely — set `classPrefix: 'h'` to reuse Bootstrap's built-in `.h1`–`.h6` classes instead of writing your own. See [Using Bootstrap's Heading Classes](#using-bootstraps-heading-classes).
+
 ## Basic Usage
 
 ### ES Module (Recommended)
@@ -158,6 +160,32 @@ SemanticHeadingHierarchy.fix('.content', { classPrefix: 'fs-' }); // Creates fs-
 // Custom prefix without dash  
 SemanticHeadingHierarchy.fix('.content', { classPrefix: 'h' }); // Creates h4, h5, etc.
 ```
+
+### Using Bootstrap's Heading Classes
+
+If your site already uses **Bootstrap** (3, 4, or 5), you don't need to write any custom CSS at all. Bootstrap ships `.h1` through `.h6` classes that style *any* element to look like that heading level, and those class names are exactly what `classPrefix: 'h'` produces:
+
+```javascript
+SemanticHeadingHierarchy.fix('.content', { classPrefix: 'h' });
+```
+
+A healed heading then carries Bootstrap's own class:
+
+**Before (`H1 → H3` jump):**
+```html
+<h1>Main Title</h1>
+<h3>Section Title</h3>   <!-- styled by Bootstrap's .h3 / h3 rules -->
+```
+
+**After (with `classPrefix: 'h'`):**
+```html
+<h1>Main Title</h1>
+<h2 class="h3" data-prev-heading="3">Section Title</h2>
+```
+
+The element is now a semantically correct `<h2>`, but Bootstrap's existing `.h3` rule (e.g. `font-size: 24px`) keeps it looking exactly like the H3 it was authored as — **no extra CSS required.** This works because a class selector (`.h3`) outranks an element selector (`h2`) on specificity, so Bootstrap's `.h3` styling wins over the `<h2>` tag's defaults.
+
+> This is the one setup where you can skip the [Required CSS Implementation](#required-css-implementation) step — Bootstrap already provides the styling classes for you.
 
 ## 🔧 Debug Mode & Smart Logging
 
