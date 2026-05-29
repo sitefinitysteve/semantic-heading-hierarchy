@@ -81,8 +81,15 @@ SemanticHeadingHierarchy.fix('.content', { logResults: true });
 // Convert additional H1s to H2s (for pages with multiple H1s)
 SemanticHeadingHierarchy.fix('.content', { forceSingleH1: true });
 
+// When the container has no H1, promote its first heading to H1 and heal from there
+SemanticHeadingHierarchy.fix('.content', { promoteFirstHeading: true });
+
 // Use custom CSS class prefix
 SemanticHeadingHierarchy.fix('.content', { classPrefix: 'fs-' });
+
+// Inspect what happened - fix() returns a structured HealResult
+const result = SemanticHeadingHierarchy.fix('.content');
+console.table(result.headings);
 ```
 
 ### Browser Global
@@ -98,7 +105,8 @@ window.SemanticHeadingHierarchy.fix('.main-content');
 SemanticHeadingHierarchy.fix('.content', {
     logResults: true,           // Show detailed console output
     classPrefix: 'hs-',         // CSS class prefix (default: 'hs-')
-    forceSingleH1: false        // Convert additional H1s to H2s (default: false)
+    forceSingleH1: false,       // Convert additional H1s to H2s (default: false)
+    promoteFirstHeading: false  // If no H1 exists, promote the first heading to H1 (default: false)
 });
 ```
 
@@ -156,6 +164,13 @@ SemanticHeadingHierarchy.logging.enable();
 SemanticHeadingHierarchy.logging.disable();
 ```
 
+**Toggle debug mode** - flips the current setting and returns the new state (`true` = now on):
+```javascript
+const isOn = SemanticHeadingHierarchy.logging.toggle();
+```
+
+All three (`enable`, `disable`, `toggle`) persist via `localStorage`, so the setting survives page reloads until you change it.
+
 ### What You'll See
 
 When debug mode is enabled, you'll see detailed console output like this:
@@ -168,7 +183,10 @@ Will change H6 → H3 (will add hs-6 class)
 Replaced H4 with H2, added hs-4 class
 Replaced H6 with H3, added hs-6 class
 Heading structure fix complete. Modified 2 heading(s)
+ℹ️  FYI: heading-healing logging is ON globally and persists across page loads. Turn it off any time with disableHeadingLogging().
 ```
+
+Because the global setting persists across page loads, that final **FYI line is printed at the end of every heal** while global logging is on — a reminder of how to turn it off so it doesn't quietly stay enabled. (It only appears when logging was switched on via the global `localStorage` override, not when you pass `logResults: true` to a single `fix()` call.)
 
 ### Manual localStorage Control
 
@@ -249,6 +267,36 @@ If you have headings before the H1 (like in navigation or headers), **the librar
 
 **These warnings are always shown regardless of your logging settings** because they're important for accessibility compliance.
 
+#### No H1 In the Container
+
+By default, if the container has no H1 the library has nothing to anchor to, so it does nothing and returns `{ ran: false, ... }`. This is the safe default - the library never invents an H1 for you.
+
+Sometimes, though, you're scoped to a fragment (a CMS content area, a widget) that genuinely has no H1 and you'd rather heal it than skip it. Enable `promoteFirstHeading` to promote the container's first heading (whatever level it is) up to H1, then cascade the rest down as normal:
+
+```javascript
+SemanticHeadingHierarchy.fix('.content-area', { promoteFirstHeading: true });
+```
+
+**Before (no H1 in the fragment):**
+```html
+<div class="content-area">
+    <h3>Widget Title</h3>     <!-- first heading -->
+    <h4>Detail</h4>
+    <h4>Another Detail</h4>
+</div>
+```
+
+**After:**
+```html
+<div class="content-area">
+    <h1 class="hs-3" data-prev-heading="3">Widget Title</h1>   <!-- promoted to H1, styled as H3 -->
+    <h2 class="hs-4" data-prev-heading="4">Detail</h2>         <!-- cascaded down -->
+    <h2 class="hs-4" data-prev-heading="4">Another Detail</h2>
+</div>
+```
+
+The promoted heading keeps its original visual size via the `hs-X` class (same FLOUT prevention as a normal heal). The result's `promotedFirstHeading` flag will be `true`, and the promoted entry has `state: 'promoted'`.
+
 ### Multiple H1 Example with forceSingleH1
 
 **Before (Multiple H1s - accessibility violation):**
@@ -298,9 +346,10 @@ SemanticHeadingHierarchy.fix('.content-area', { logResults: true });
   - `options.logResults` (boolean, optional): Enable detailed console logging. Defaults to `false`
   - `options.classPrefix` (string, optional): Custom prefix for styling classes. Defaults to `'hs-'`
   - `options.forceSingleH1` (boolean, optional): Convert additional H1 elements to H2 elements. Defaults to `false`
+  - `options.promoteFirstHeading` (boolean, optional): When no H1 exists in the container, promote its first heading (H2–H6) to H1 and heal from there instead of bailing. Defaults to `false`
 
 **Requirements:**
-- **Must contain an H1 element** - The library requires an existing H1 to function
+- **Must contain an H1 element** - The library requires an existing H1 to function (unless `promoteFirstHeading` is enabled)
 - Only headings that come after the first H1 will be processed
 - The H1 element itself is never modified
 
@@ -309,13 +358,42 @@ SemanticHeadingHierarchy.fix('.content-area', { logResults: true });
 - Returns error if multiple elements found
 - Returns warning if no elements found
 
-**Returns:** `void`
+**Returns:** `HealResult` - a structured object describing what happened to every heading:
+
+```typescript
+interface HealResult {
+  ran: boolean;                 // true when an H1 anchor was found/created and headings were processed
+  promotedFirstHeading: boolean;// true when the first heading was promoted to H1 (promoteFirstHeading)
+  modifiedCount: number;        // number of headings whose level was changed
+  headings: HeadingResult[];    // per-heading outcome, in document order
+}
+
+interface HeadingResult {
+  text: string;       // trimmed text content of the heading
+  from: number;       // original heading level (1-6) as authored
+  to: number;         // final heading level (1-6) after healing (equals `from` when unchanged)
+  state: HeadingState;// what the healer did with this heading (see below)
+  element: Element;   // the live heading element after healing (the replacement, if it was rewritten)
+}
+
+type HeadingState =
+  | 'anchor'                 // the H1 the hierarchy is measured from
+  | 'promoted'               // promoted up to H1 because none existed (promoteFirstHeading)
+  | 'changed'                // level was rewritten
+  | 'unchanged'              // evaluated, already at the correct level
+  | 'skipped-list'           // inside a multi-item list, left alone by design
+  | 'ignored-before-h1'      // appears before the H1, ignored
+  | 'ignored-additional-h1'; // an extra H1 after the first, ignored
+```
+
+When `fix()` bails (e.g. no H1 and `promoteFirstHeading` is off), it returns an empty result: `{ ran: false, promotedFirstHeading: false, modifiedCount: 0, headings: [] }`. The return value is purely informational - existing callers that ignore it are unaffected.
 
 ### `SemanticHeadingHierarchy.logging`
 
 **Methods:**
 - `SemanticHeadingHierarchy.logging.enable()`: Enable detailed logging for all fix calls via localStorage
 - `SemanticHeadingHierarchy.logging.disable()`: Disable detailed logging for all fix calls via localStorage
+- `SemanticHeadingHierarchy.logging.toggle()`: Flip logging on/off based on the current state; returns the new state (`boolean`)
 - `SemanticHeadingHierarchy.logging.clear()`: Clear localStorage override, returns to using function parameters
 - `SemanticHeadingHierarchy.logging.status()`: Get the current logging status from localStorage
 
@@ -328,7 +406,7 @@ SemanticHeadingHierarchy.fix('.content-area', { logResults: true });
 3. **Console warning for headings before H1** - Always warns when problematic structure is detected (regardless of logging settings)
 4. **Additional H1s are handled based on forceSingleH1 option** - Either ignored (default) or converted to H2s
 5. **Console warning for additional H1s** - Always warns when multiple H1s are found (regardless of logging settings)
-6. **No H1 elements are ever created** - The library requires an existing H1 to function
+6. **No H1 elements are created by default** - The library requires an existing H1 to function, unless you opt in with `promoteFirstHeading` (which promotes the container's first heading to H1)
 7. **No heading levels are skipped** - Ensures proper accessibility progression
 8. **Minimum level is H2** - Never creates additional H1 elements
 9. **Maximum level is H6** - Respects HTML heading limits
@@ -353,6 +431,38 @@ The library intelligently handles headings within lists:
     <li><h6>Special Feature</h6></li>  <!-- Will become h3 with hs-6 class -->
 </ul>
 ```
+
+## Inspecting What Happened
+
+There are three ways to see what the library did:
+
+### 1. The `HealResult` return value
+
+`fix()` returns a [`HealResult`](#semanticheadinghierarchyfixcontainerorselector-options) describing every heading in document order. Drop it straight into `console.table` for a readable summary:
+
+```javascript
+const result = SemanticHeadingHierarchy.fix('.content');
+console.table(result.headings);   // text, from, to, state, element for each heading
+console.log(`${result.modifiedCount} heading(s) changed`);
+```
+
+### 2. The `data-heading-processed` attribute (devtools)
+
+Every heading the library evaluates is tagged with a `data-heading-processed` attribute, so when you inspect the page in devtools you can confirm the library ran and see what it decided for each heading. The value matches the heading's `state`:
+
+| Value | Meaning |
+| --- | --- |
+| `anchor` | The H1 the hierarchy is measured from |
+| `promoted` | Promoted up to H1 because none existed (`promoteFirstHeading`) |
+| `changed` | Level was rewritten |
+| `unchanged` | Evaluated, already at the correct level |
+| `skipped-list` | Inside a multi-item list, left alone by design |
+| `ignored-before-h1` | Appears before the H1, ignored |
+| `ignored-additional-h1` | An extra H1 after the first, ignored |
+
+### 3. The `data-prev-heading` attribute
+
+Headings whose level actually changed (including a promoted H1) also carry `data-prev-heading="<original level>"`, recording what level they were authored at before healing.
 
 ## Testing & Validation
 
@@ -443,7 +553,7 @@ semantic-heading-hierarchy/
 
 The project uses [Vitest](https://vitest.dev/) for testing and [html-validate](https://www.npmjs.com/package/html-validate) for accessibility validation:
 
-- **91+ comprehensive tests** covering all functionality
+- **120+ comprehensive tests** covering all functionality
 - **html-validate integration** ensures real accessibility compliance
 - **Complex real-world scenarios** with Bootstrap, CMSs, and documentation sites
 - **Edge case testing** for nested lists, missing H1s, and malformed HTML

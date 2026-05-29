@@ -1,35 +1,47 @@
-import { FixOptions, ElementReplacement } from './types.js';
+import { FixOptions, ElementReplacement, HealResult, HeadingResult } from './types.js';
 
 /**
  * Corrects improper heading hierarchies by ensuring proper semantic structure
  * @param containerOrSelector - CSS selector string or DOM element to search within
  * @param options - Options object or boolean for logResults (for backwards compatibility)
+ * @returns A HealResult describing every heading (in document order) and what the healer did
+ *          with it. When it bails (e.g. no H1 and promoteFirstHeading is off) `ran` is false.
  */
 export function healHeadings(
   containerOrSelector: string | Element = document.body,
   options: boolean | FixOptions = false
-): void {
+): HealResult {
   // Handle backwards compatibility - if options is boolean, treat as logResults
   let logResults = false;
   let classPrefix = 'hs-';
   let forceSingleH1 = false;
-  
+  let promoteFirstHeading = false;
+
   if (typeof options === 'boolean') {
     logResults = options;
   } else if (typeof options === 'object' && options !== null) {
     logResults = options.logResults || false;
     classPrefix = options.classPrefix || 'hs-';
     forceSingleH1 = options.forceSingleH1 || false;
+    promoteFirstHeading = options.promoteFirstHeading || false;
   }
   
-  // Check localStorage for global logging override
+  // Check localStorage for global logging override. Track whether the override is what turned
+  // logging on, so we can show a "this is on globally" FYI when the run finishes.
+  let logFromGlobalOverride = false;
   if (typeof localStorage !== 'undefined') {
     const logOverride = localStorage.getItem('healHeadings.logResults');
     if (logOverride !== null) {
       logResults = logOverride === 'true';
+      logFromGlobalOverride = logResults;
     }
   }
-  
+
+  // Per-heading outcomes (keyed by the original element) assembled into the return value.
+  const outcomes = new Map<Element, HeadingResult>();
+  let didPromote = false;
+  const empty = (): HealResult => ({ ran: false, promotedFirstHeading: false, modifiedCount: 0, headings: [] });
+
   let container: Element;
   
   // Handle selector string
@@ -38,12 +50,12 @@ export function healHeadings(
     
     if (elements.length === 0) {
       console.warn(`No elements found for selector: ${containerOrSelector}`);
-      return;
+      return empty();
     }
-    
+
     if (elements.length > 1) {
       console.error(`Multiple elements found for selector: ${containerOrSelector}. Selector must match exactly one element.`);
-      return;
+      return empty();
     }
     
     container = elements[0];
@@ -54,26 +66,90 @@ export function healHeadings(
   
   if (!container || !(container instanceof Element)) {
     console.warn('Invalid container provided to healHeadings');
-    return;
+    return empty();
   }
 
   // Find the first H1 element within the container
-  const h1Element = container.querySelector('h1');
+  let h1Element = container.querySelector('h1');
+
   if (!h1Element) {
-    if (logResults) {
-      console.log('No H1 found - skipping heading structure fix');
+    // By default there is nothing to anchor to, so we bail. With promoteFirstHeading enabled
+    // we instead promote the first heading in the container up to <h1> and heal from there.
+    if (!promoteFirstHeading) {
+      if (logResults) {
+        console.log('No H1 found - skipping heading structure fix');
+      }
+      return empty();
     }
-    return;
+
+    const firstHeading = container.querySelector('h2, h3, h4, h5, h6');
+    if (!firstHeading) {
+      if (logResults) {
+        console.log('No H1 found and no headings to promote - nothing to fix');
+      }
+      return empty();
+    }
+
+    const promotedLevel = parseInt(firstHeading.tagName.charAt(1), 10);
+
+    // Preserve the original size so the page does not visually jump (same FLOUT-prevention
+    // approach as a normal heal): keep a styling hook and record where it came from.
+    firstHeading.classList.add(`${classPrefix}${promotedLevel}`);
+
+    const promotedH1 = document.createElement('h1');
+    Array.from(firstHeading.attributes).forEach(attr => {
+      promotedH1.setAttribute(attr.name, attr.value);
+    });
+    // Move child nodes across rather than copying innerHTML - preserves nested markup and
+    // event listeners without a parse round-trip.
+    while (firstHeading.firstChild) {
+      promotedH1.appendChild(firstHeading.firstChild);
+    }
+    promotedH1.setAttribute('data-prev-heading', promotedLevel.toString());
+    promotedH1.setAttribute('data-heading-processed', 'promoted');
+
+    if (firstHeading.parentNode) {
+      firstHeading.parentNode.replaceChild(promotedH1, firstHeading);
+    }
+
+    h1Element = promotedH1;
+    didPromote = true;
+    outcomes.set(promotedH1, {
+      text: (promotedH1.textContent || '').trim(),
+      from: promotedLevel,
+      to: 1,
+      state: 'promoted',
+      element: promotedH1
+    });
+
+    if (logResults) {
+      console.log(`No H1 found - promoted first ${firstHeading.tagName} to H1 (added ${classPrefix}${promotedLevel} class)`);
+    }
+  } else {
+    // Mark the anchor H1 so a devtools inspection confirms the library ran on this container.
+    h1Element.setAttribute('data-heading-processed', 'anchor');
+    outcomes.set(h1Element, {
+      text: (h1Element.textContent || '').trim(),
+      from: 1,
+      to: 1,
+      state: 'anchor',
+      element: h1Element
+    });
   }
 
   // Get all headings within the container
   const allHeadings = Array.from(container.querySelectorAll('h1, h2, h3, h4, h5, h6'));
   const h1Index = allHeadings.indexOf(h1Element);
-  
+
   // Check for headings before the H1 and warn (always warn, regardless of logging setting)
   const headingsBeforeH1 = allHeadings.slice(0, h1Index);
   if (headingsBeforeH1.length > 0) {
     const headingTypes = headingsBeforeH1.map(h => h.tagName.toLowerCase()).join(', ');
+    headingsBeforeH1.forEach(h => {
+      h.setAttribute('data-heading-processed', 'ignored-before-h1');
+      const lvl = parseInt(h.tagName.charAt(1), 10);
+      outcomes.set(h, { text: (h.textContent || '').trim(), from: lvl, to: lvl, state: 'ignored-before-h1', element: h });
+    });
     console.warn(`⚠️  Found ${headingsBeforeH1.length} heading(s) before H1: ${headingTypes}. These headings will be ignored for accessibility compliance. Consider restructuring your HTML to place all content headings after the main H1.`);
   }
   
@@ -83,6 +159,11 @@ export function healHeadings(
     if (forceSingleH1) {
       console.warn(`⚠️  Found ${additionalH1s.length} additional H1 element(s) after the first H1. These will be converted to H2 elements due to forceSingleH1 option.`);
     } else {
+      // Not converting them, so they are skipped by the loop below - mark them as ignored here.
+      additionalH1s.forEach(h => {
+        h.setAttribute('data-heading-processed', 'ignored-additional-h1');
+        outcomes.set(h, { text: (h.textContent || '').trim(), from: 1, to: 1, state: 'ignored-additional-h1', element: h });
+      });
       console.warn(`⚠️  Found ${additionalH1s.length} additional H1 element(s) after the first H1. These will be ignored. Consider using the forceSingleH1 option to convert them to H2 elements.`);
     }
   }
@@ -100,15 +181,12 @@ export function healHeadings(
     headings = headingsAfterH1.filter(heading => heading.tagName.toLowerCase() !== 'h1');
   }
 
-  if (headings.length === 0) {
-    if (logResults) {
-      console.log('No H2-H6 headings found after H1 - nothing to fix');
-    }
-    return;
-  }
-
   if (logResults) {
-    console.log(`Found ${headings.length} heading(s) to process after H1`);
+    if (headings.length === 0) {
+      console.log('No H2-H6 headings found after H1 - nothing to fix');
+    } else {
+      console.log(`Found ${headings.length} heading(s) to process after H1`);
+    }
   }
 
   let previousLevel = 1; // Start with H1 level
@@ -133,6 +211,8 @@ export function healHeadings(
           if (logResults) {
             console.log(`Skipping ${originalTag} in list with ${siblingItems.length} items`);
           }
+          heading.setAttribute('data-heading-processed', 'skipped-list');
+          outcomes.set(heading, { text: (heading.textContent || '').trim(), from: originalLevel, to: originalLevel, state: 'skipped-list', element: heading });
           continue;
         }
       }
@@ -155,6 +235,13 @@ export function healHeadings(
 
     // Ensure we stay within valid heading range (H2-H6)
     newLevel = Math.max(2, Math.min(newLevel, 6));
+
+    // Mark every evaluated heading so a devtools inspection shows it was processed.
+    // For changed headings this value is carried onto the replacement element when
+    // attributes are copied below.
+    const changed = newLevel !== originalLevel;
+    heading.setAttribute('data-heading-processed', changed ? 'changed' : 'unchanged');
+    outcomes.set(heading, { text: (heading.textContent || '').trim(), from: originalLevel, to: newLevel, state: changed ? 'changed' : 'unchanged', element: heading });
 
     // Queue element for replacement if level changed
     if (newLevel !== originalLevel) {
@@ -199,6 +286,12 @@ export function healHeadings(
       original.parentNode.replaceChild(newHeading, original);
     }
 
+    // Point the recorded outcome at the element that now lives in the DOM.
+    const outcome = outcomes.get(original);
+    if (outcome) {
+      outcome.element = newHeading;
+    }
+
     if (logResults) {
       console.log(`Replaced ${originalTag.toUpperCase()} with H${newLevel}, added ${classPrefix}${originalLevel} class`);
     }
@@ -206,5 +299,23 @@ export function healHeadings(
 
   if (logResults) {
     console.log(`Heading structure fix complete. Modified ${elementsToReplace.length} heading(s)`);
+    // FYI on finish: the global override persists across page loads, so remind callers it is on
+    // (and how to turn it off) every time a heal completes while it is active.
+    if (logFromGlobalOverride) {
+      console.log('ℹ️  FYI: heading-healing logging is ON globally and persists across page loads. Turn it off any time with disableHeadingLogging().');
+    }
   }
+
+  // Assemble the per-heading outcomes in document order (allHeadings is the pre-modification
+  // snapshot; each outcome.element has been repointed to its replacement where applicable).
+  const headingResults = allHeadings
+    .map(h => outcomes.get(h))
+    .filter((r): r is HeadingResult => r !== undefined);
+
+  return {
+    ran: true,
+    promotedFirstHeading: didPromote,
+    modifiedCount: elementsToReplace.length,
+    headings: headingResults
+  };
 }

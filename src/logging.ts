@@ -56,12 +56,32 @@ export function getHeadingLoggingStatus(): string | null {
 }
 
 /**
+ * Toggles detailed logging on or off based on its current state, persisting via localStorage
+ * @returns The new logging state (true = now enabled, false = now disabled)
+ */
+export function toggleHeadingLogging(): boolean {
+  if (typeof localStorage === 'undefined') {
+    console.warn('localStorage not available - cannot toggle global logging');
+    return false;
+  }
+  // Anything other than an explicit 'true' (including unset) is treated as off, so a toggle turns it on.
+  const turningOn = localStorage.getItem('healHeadings.logResults') !== 'true';
+  if (turningOn) {
+    enableHeadingLogging();
+  } else {
+    disableHeadingLogging();
+  }
+  return turningOn;
+}
+
+/**
  * Creates a logging interface object that implements LoggingInterface
  */
 export function createLoggingInterface(): LoggingInterface {
   return {
     enable: enableHeadingLogging,
     disable: disableHeadingLogging,
+    toggle: toggleHeadingLogging,
     clear: clearHeadingLogging,
     status: getHeadingLoggingStatus
   };

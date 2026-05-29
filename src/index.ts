@@ -1,15 +1,16 @@
 import { healHeadings } from './core.js';
-import { 
-  enableHeadingLogging, 
-  disableHeadingLogging, 
-  clearHeadingLogging, 
+import {
+  enableHeadingLogging,
+  disableHeadingLogging,
+  toggleHeadingLogging,
+  clearHeadingLogging,
   getHeadingLoggingStatus,
   createLoggingInterface
 } from './logging.js';
 import { SemanticHeadingHierarchyInterface } from './types.js';
 
 // Re-export types for public API
-export type { FixOptions } from './types.js';
+export type { FixOptions, HealResult, HeadingResult, HeadingState } from './types.js';
 
 /**
  * Semantic Heading Hierarchy API
@@ -33,7 +34,7 @@ export default SemanticHeadingHierarchy;
 
 // Also export the legacy functions for backwards compatibility
 export { healHeadings };
-export { enableHeadingLogging, disableHeadingLogging, clearHeadingLogging, getHeadingLoggingStatus };
+export { enableHeadingLogging, disableHeadingLogging, toggleHeadingLogging, clearHeadingLogging, getHeadingLoggingStatus };
 
 // Browser global declarations for window object
 declare global {
@@ -42,6 +43,7 @@ declare global {
     healHeadings: typeof healHeadings;
     enableHeadingLogging: typeof enableHeadingLogging;
     disableHeadingLogging: typeof disableHeadingLogging;
+    toggleHeadingLogging: typeof toggleHeadingLogging;
     clearHeadingLogging: typeof clearHeadingLogging;
     getHeadingLoggingStatus: typeof getHeadingLoggingStatus;
   }
@@ -54,6 +56,7 @@ if (typeof window !== 'undefined') {
   window.healHeadings = healHeadings;
   window.enableHeadingLogging = enableHeadingLogging;
   window.disableHeadingLogging = disableHeadingLogging;
+  window.toggleHeadingLogging = toggleHeadingLogging;
   window.clearHeadingLogging = clearHeadingLogging;
   window.getHeadingLoggingStatus = getHeadingLoggingStatus;
 }

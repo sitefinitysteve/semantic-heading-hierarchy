@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { 
-    healHeadings, 
-    enableHeadingLogging, 
-    disableHeadingLogging, 
-    clearHeadingLogging, 
-    getHeadingLoggingStatus 
+import SemanticHeadingHierarchy, {
+    healHeadings,
+    enableHeadingLogging,
+    disableHeadingLogging,
+    toggleHeadingLogging,
+    clearHeadingLogging,
+    getHeadingLoggingStatus
 } from '../src/index.js';
 
 describe('healHeadings - localStorage Logging Control', () => {
@@ -214,6 +215,161 @@ describe('healHeadings - localStorage Logging Control', () => {
         });
     });
 
+    describe('Toggle Functionality', () => {
+        it('should turn logging on when it is unset', () => {
+            const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+            const nowOn = toggleHeadingLogging();
+
+            expect(nowOn).toBe(true);
+            expect(mockLocalStorage.setItem).toHaveBeenCalledWith('healHeadings.logResults', 'true');
+            expect(getHeadingLoggingStatus()).toBe('true');
+
+            consoleSpy.mockRestore();
+        });
+
+        it('should turn logging off when it is currently on', () => {
+            const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+            enableHeadingLogging();
+            const nowOn = toggleHeadingLogging();
+
+            expect(nowOn).toBe(false);
+            expect(mockLocalStorage.setItem).toHaveBeenCalledWith('healHeadings.logResults', 'false');
+            expect(getHeadingLoggingStatus()).toBe('false');
+
+            consoleSpy.mockRestore();
+        });
+
+        it('should turn logging back on when it is currently off', () => {
+            const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+            disableHeadingLogging();
+            const nowOn = toggleHeadingLogging();
+
+            expect(nowOn).toBe(true);
+            expect(getHeadingLoggingStatus()).toBe('true');
+
+            consoleSpy.mockRestore();
+        });
+
+        it('should round-trip on → off → on across repeated toggles', () => {
+            const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+            expect(toggleHeadingLogging()).toBe(true);
+            expect(toggleHeadingLogging()).toBe(false);
+            expect(toggleHeadingLogging()).toBe(true);
+
+            consoleSpy.mockRestore();
+        });
+
+        it('should actually flip healHeadings logging behaviour when toggled', () => {
+            const h1 = document.createElement('h1');
+            h1.textContent = 'Main';
+            const h4 = document.createElement('h4');
+            h4.textContent = 'Section';
+            container.appendChild(h1);
+            container.appendChild(h4);
+
+            // Toggle ON - healHeadings should now log regardless of the function parameter.
+            toggleHeadingLogging();
+
+            const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+            healHeadings(container, { logResults: false });
+            expect(consoleSpy).toHaveBeenCalledWith(
+                expect.stringContaining('Found 1 heading(s) to process after H1')
+            );
+
+            // Toggle OFF - healHeadings should now stay silent even when asked to log.
+            consoleSpy.mockClear();
+            toggleHeadingLogging();
+            consoleSpy.mockClear(); // drop the toggle's own status message
+            healHeadings(container, { logResults: true });
+            expect(consoleSpy).not.toHaveBeenCalledWith(
+                expect.stringContaining('Found 1 heading(s) to process after H1')
+            );
+
+            consoleSpy.mockRestore();
+        });
+
+        it('should be available on the SemanticHeadingHierarchy.logging interface', () => {
+            const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+            expect(typeof SemanticHeadingHierarchy.logging.toggle).toBe('function');
+
+            const nowOn = SemanticHeadingHierarchy.logging.toggle();
+            expect(nowOn).toBe(true);
+            expect(getHeadingLoggingStatus()).toBe('true');
+
+            consoleSpy.mockRestore();
+        });
+    });
+
+    describe('Finish FYI note', () => {
+        function seedHeadings() {
+            const h1 = document.createElement('h1');
+            h1.textContent = 'Main';
+            const h4 = document.createElement('h4');
+            h4.textContent = 'Section';
+            container.appendChild(h1);
+            container.appendChild(h4);
+        }
+
+        it('prints an FYI on finish, when globally enabled, telling the user how to turn it off', () => {
+            seedHeadings();
+            enableHeadingLogging();
+
+            const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+            healHeadings(container);
+
+            expect(consoleSpy).toHaveBeenCalledWith(
+                expect.stringContaining('Heading structure fix complete')
+            );
+            expect(consoleSpy).toHaveBeenCalledWith(
+                expect.stringContaining('disableHeadingLogging()')
+            );
+            expect(consoleSpy).toHaveBeenCalledWith(
+                expect.stringContaining('persists across page loads')
+            );
+
+            consoleSpy.mockRestore();
+        });
+
+        it('does NOT print the global FYI when logging is on only via the function parameter', () => {
+            seedHeadings();
+            clearHeadingLogging(); // ensure no localStorage override is in play
+
+            const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+            healHeadings(container, { logResults: true });
+
+            // It still logs the normal completion line...
+            expect(consoleSpy).toHaveBeenCalledWith(
+                expect.stringContaining('Heading structure fix complete')
+            );
+            // ...but not the persistent-global FYI, since the override isn't what enabled logging.
+            expect(consoleSpy).not.toHaveBeenCalledWith(
+                expect.stringContaining('disableHeadingLogging()')
+            );
+
+            consoleSpy.mockRestore();
+        });
+
+        it('does NOT print the FYI when the global override is set to off', () => {
+            seedHeadings();
+            disableHeadingLogging(); // override = 'false'
+
+            const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+            healHeadings(container, { logResults: true });
+
+            // Override forces logging off entirely, so neither the completion line nor the FYI appears.
+            expect(consoleSpy).not.toHaveBeenCalledWith(
+                expect.stringContaining('disableHeadingLogging()')
+            );
+
+            consoleSpy.mockRestore();
+        });
+    });
+
     describe('No localStorage Environment', () => {
         beforeEach(() => {
             // Remove localStorage by setting to undefined
@@ -258,6 +414,17 @@ describe('healHeadings - localStorage Logging Control', () => {
             disableHeadingLogging();
 
             expect(consoleWarnSpy).toHaveBeenCalledWith('localStorage not available - cannot disable global logging');
+
+            consoleWarnSpy.mockRestore();
+        });
+
+        it('should warn and return false when trying to toggle logging without localStorage', () => {
+            const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+            const result = toggleHeadingLogging();
+
+            expect(result).toBe(false);
+            expect(consoleWarnSpy).toHaveBeenCalledWith('localStorage not available - cannot toggle global logging');
 
             consoleWarnSpy.mockRestore();
         });
