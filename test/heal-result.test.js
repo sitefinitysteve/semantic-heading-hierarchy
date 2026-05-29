@@ -77,4 +77,53 @@ describe('healHeadings return value (HealResult)', () => {
             expect(h.element.tagName).toBe('H3');
         });
     });
+
+    it('records headings before the H1 as ignored-before-h1 without modifying them', () => {
+        container = createTestContainer('<h2>Before</h2><h1>Title</h1><h4>After</h4>');
+
+        const result = healHeadings(container);
+
+        expect(result.modifiedCount).toBe(1);
+        expect(result.headings[0]).toMatchObject({
+            from: 2, to: 2, state: 'ignored-before-h1', text: 'Before'
+        });
+        // The ignored heading is untouched in the DOM.
+        expect(result.headings[0].element.tagName).toBe('H2');
+        expect(result.headings[0].element.hasAttribute('data-prev-heading')).toBe(false);
+    });
+
+    it('records additional H1s as ignored-additional-h1 by default', () => {
+        container = createTestContainer(
+            '<h1>First</h1><h4>Sub</h4><h1>Second</h1><h5>Tail</h5>'
+        );
+
+        const result = healHeadings(container);
+
+        expect(result.modifiedCount).toBe(2);
+        const second = result.headings.find(h => h.text === 'Second');
+        expect(second).toMatchObject({ from: 1, to: 1, state: 'ignored-additional-h1' });
+        // Left as an H1 in the DOM - not converted, not marked.
+        expect(second.element.tagName).toBe('H1');
+        expect(second.element.hasAttribute('data-prev-heading')).toBe(false);
+    });
+
+    it('reflects forceSingleH1 conversions in modifiedCount and the converted entry', () => {
+        container = createTestContainer(
+            '<h1>First</h1><h4>Sub</h4><h1>Second</h1><h5>Tail</h5>'
+        );
+
+        const result = healHeadings(container, { forceSingleH1: true });
+
+        // Sub (H4->H2), Second (H1->H2) and Tail (H5->H3) are all modified.
+        expect(result.modifiedCount).toBe(3);
+
+        const second = result.headings.find(h => h.text === 'Second');
+        expect(second).toMatchObject({ from: 1, to: 2, state: 'changed' });
+        expect(second.element.tagName).toBe('H2');
+
+        // The anchor is still reported as the anchor...
+        expect(result.headings[0]).toMatchObject({ from: 1, to: 1, state: 'anchor' });
+        // ...and exactly one H1 survives in the DOM.
+        expect(container.querySelectorAll('h1')).toHaveLength(1);
+    });
 });

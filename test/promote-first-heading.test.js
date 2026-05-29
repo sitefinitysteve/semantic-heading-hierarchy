@@ -93,4 +93,48 @@ describe('promoteFirstHeading option', () => {
         expect(h1.querySelector('span.icon')).toBeTruthy();
         expect(h1.querySelector('em').textContent).toBe('Heading');
     });
+
+    it('promotes the first heading even when it lives inside a list item', () => {
+        container = createTestContainer(
+            '<ul><li><h3>Lead in list</h3></li><li><h3>Second</h3></li></ul><h4>After list</h4>'
+        );
+
+        const result = healHeadings(container, { promoteFirstHeading: true });
+
+        // The first heading is promoted to H1 in place (it stays nested in its <li>).
+        const h1 = container.querySelector('h1');
+        expect(result.promotedFirstHeading).toBe(true);
+        expect(h1.textContent).toBe('Lead in list');
+        expect(h1.getAttribute('data-heading-processed')).toBe('promoted');
+        expect(h1.classList.contains('hs-3')).toBe(true);
+        expect(h1.getAttribute('data-prev-heading')).toBe('3');
+
+        // Its sibling list heading is now in a multi-item list, so it is skipped (stays H3).
+        const second = Array.from(container.querySelectorAll('h3')).find(h => h.textContent === 'Second');
+        expect(second).toBeTruthy();
+        expect(second.hasAttribute('data-prev-heading')).toBe(false);
+
+        // The heading after the list heals normally under the new H1.
+        const after = container.querySelector('h2');
+        expect(after.textContent).toBe('After list');
+        expect(after.getAttribute('data-prev-heading')).toBe('4');
+    });
+
+    it('promotes a deep first heading (H6) and preserves its visual size', () => {
+        container = createTestContainer('<h6>Deep lead</h6><h2>Then</h2>');
+
+        const result = healHeadings(container, { promoteFirstHeading: true });
+
+        const h1 = container.querySelector('h1');
+        expect(result.promotedFirstHeading).toBe(true);
+        expect(h1.textContent).toBe('Deep lead');
+        // The promoted heading keeps its original small (H6) styling hook.
+        expect(h1.classList.contains('hs-6')).toBe(true);
+        expect(h1.getAttribute('data-prev-heading')).toBe('6');
+
+        // The existing H2 is already valid under the new H1, so it is left as-is.
+        const tags = Array.from(container.querySelectorAll('h1,h2,h3,h4,h5,h6')).map(h => h.tagName);
+        expect(tags).toEqual(['H1', 'H2']);
+        expect(result.modifiedCount).toBe(0);
+    });
 });

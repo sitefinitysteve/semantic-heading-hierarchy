@@ -25,7 +25,15 @@ export function healHeadings(
     forceSingleH1 = options.forceSingleH1 || false;
     promoteFirstHeading = options.promoteFirstHeading || false;
   }
-  
+
+  // A classPrefix containing whitespace would make classList.add() throw and abort the heal
+  // mid-DOM-mutation, leaving the page half-healed. Guard against it by falling back to the
+  // default prefix (same forgiving spirit as the empty-string fallback above).
+  if (/\s/.test(classPrefix)) {
+    console.warn(`Invalid classPrefix "${classPrefix}" contains whitespace; falling back to "hs-".`);
+    classPrefix = 'hs-';
+  }
+
   // Check localStorage for global logging override. Track whether the override is what turned
   // logging on, so we can show a "this is on globally" FYI when the run finishes.
   let logFromGlobalOverride = false;
@@ -201,11 +209,14 @@ export function healHeadings(
     // Check if this heading is inside a list with sibling items
     const listItem = heading.closest('li');
     if (listItem) {
-      // Check if this li has sibling li elements
+      // Check if this li has sibling li elements. Count only the DIRECT children of the
+      // immediate list - querySelectorAll('li') also matches <li> in nested sublists, which
+      // would wrongly treat a single-item list (with a nested list inside it) as multi-item
+      // and skip a heading that should have been healed.
       const parentList = listItem.parentElement;
       if (parentList) {
-        const siblingItems = parentList.querySelectorAll('li');
-        
+        const siblingItems = Array.from(parentList.children).filter(el => el.tagName === 'LI');
+
         if (siblingItems.length > 1) {
           // Skip headings in lists with multiple items
           if (logResults) {

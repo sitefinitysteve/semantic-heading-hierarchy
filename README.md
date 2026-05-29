@@ -5,6 +5,14 @@
 
 A JavaScript library that automatically corrects improper heading hierarchies for better accessibility and SEO while preserving original visual styling to prevent layout flash.
 
+## Why This Exists
+
+Most broken heading hierarchies don't come from developers — they come from **CMS admin-editable content**. Content editors pick headings by how they *look*, not by what they *mean*: they want the text bigger, so they reach for an `<h2>`; they want it smaller, so they drop to an `<h5>`. They're trying to be designers, and the result is a page that looks fine but has a semantically broken outline that screen readers and search engines can't navigate.
+
+As the developer, you don't control what they type, and you usually can't realistically train every editor or audit every page they publish. What you need is a **layer that runs _after_ they're done** to repair the semantic structure for accessibility — **while leaving their visual design exactly as they intended it.**
+
+That's all this library is for. It is **not** here to fix their content or second-guess their design choices; the "ugly" stays ugly. It simply **semantically heals** the heading levels so the document outline is valid, and preserves the original appearance via styling classes so nothing visually shifts. Someone can always go back later and fix the content properly — but until then, at least it's accessible.
+
 ## What It Does
 
 Many websites have incorrect heading hierarchies that harm accessibility and SEO. Common issues include:
