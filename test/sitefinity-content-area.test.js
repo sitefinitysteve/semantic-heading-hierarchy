@@ -27,7 +27,7 @@ describe('Sitefinity .contentArea heading healing', () => {
 
     it('makes NO changes when an H1 + H2 already sit above the H3s (hierarchy is valid + list items are skipped)', () => {
         // Document order: H1 > H2 > H3 (col 1) > 3x H3 (list) > H3 (col 2) > 3x H3 (list)
-        healHeadings(container, { logResults: true });
+        const result = healHeadings(container, { logResults: true });
 
         // H1 -> H2 -> H3 is already a valid sequence, so the two section H3s are left alone.
         // Every article-title H3 lives in a <li> with sibling <li>s, so they are skipped by design.
@@ -41,17 +41,14 @@ describe('Sitefinity .contentArea heading healing', () => {
         // H1 is never touched.
         expect(container.querySelectorAll('h1').length).toBe(1);
 
-        // The healer DID run and DID see the headings - it just had nothing to rewrite.
-        expect(logSpy).toHaveBeenCalledWith('Found 9 heading(s) to process after H1');
-        expect(logSpy).toHaveBeenCalledWith('Heading structure fix complete. Modified 0 heading(s)');
+        // The healer DID run and DID see all 9 headings after the H1 - it just had nothing to rewrite.
+        expect(result.ran).toBe(true);
+        expect(result.headings.length).toBe(10); // 1 H1 anchor + 9 after it
+        expect(result.modifiedCount).toBe(0);
 
-        // All 6 article-title H3s sit in multi-item <li> lists, so all 6 are skipped.
-        // (The reported count is inflated because nested rating-star <li>s are counted too,
-        //  but the skip decision only needs "more than one item", so it is unaffected.)
-        const skipCalls = logSpy.mock.calls.filter(
-            ([msg]) => typeof msg === 'string' && msg.startsWith('Skipping h3 in list with')
-        );
-        expect(skipCalls.length).toBe(6);
+        // All 6 article-title H3s sit in multi-item <li> lists, so all 6 are skipped by design.
+        const skipped = result.headings.filter(h => h.state === 'skipped-list');
+        expect(skipped.length).toBe(6);
     });
 
     it('marks EVERY heading with data-heading-processed so a devtools inspection proves the library ran', () => {

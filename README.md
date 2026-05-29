@@ -92,6 +92,9 @@ SemanticHeadingHierarchy.fix('.content', { forceSingleH1: true });
 // When the container has no H1, promote its first heading to H1 and heal from there
 SemanticHeadingHierarchy.fix('.content', { promoteFirstHeading: true });
 
+// Also heal headings inside multi-item lists (skipped by default)
+SemanticHeadingHierarchy.fix('.content', { healListHeadings: true });
+
 // Use custom CSS class prefix
 SemanticHeadingHierarchy.fix('.content', { classPrefix: 'fs-' });
 
@@ -114,7 +117,8 @@ SemanticHeadingHierarchy.fix('.content', {
     logResults: true,           // Show detailed console output
     classPrefix: 'hs-',         // CSS class prefix (default: 'hs-')
     forceSingleH1: false,       // Convert additional H1s to H2s (default: false)
-    promoteFirstHeading: false  // If no H1 exists, promote the first heading to H1 (default: false)
+    promoteFirstHeading: false, // If no H1 exists, promote the first heading to H1 (default: false)
+    healListHeadings: false     // Heal headings inside multi-item lists too (default: false)
 });
 ```
 
@@ -181,20 +185,34 @@ All three (`enable`, `disable`, `toggle`) persist via `localStorage`, so the set
 
 ### What You'll See
 
-When debug mode is enabled, you'll see detailed console output like this:
+When debug mode is enabled, each heal prints **one collapsed group** to keep the console tidy. Expand it to see a table overview and a clickable reference to every heading element:
 
 ```
-✅ Detailed heading healing logging ENABLED globally
-Found 5 heading(s) to process after H1
-Will change H4 → H2 (will add hs-4 class)
-Will change H6 → H3 (will add hs-6 class)
-Replaced H4 with H2, added hs-4 class
-Replaced H6 with H3, added hs-6 class
-Heading structure fix complete. Modified 2 heading(s)
+▶ 🩺 healHeadings — 2 changed, 0 skipped, 4 total
+```
+
+Expanded, the group contains a `console.table` and one line per heading whose final argument is the **live DOM node** — in the browser you can click it to highlight/reveal the element in the Elements panel:
+
+```
+🩺 healHeadings — 2 changed, 0 skipped, 4 total
+┌─────────┬───────────┬───────────┬───────┬───────────────┐
+│ (index) │  heading  │   state   │ class │     text      │
+├─────────┼───────────┼───────────┼───────┼───────────────┤
+│    0    │   'H1'    │ 'anchor'  │  ''   │ 'Main Title'  │
+│    1    │ 'H4 → H2' │ 'changed' │ 'hs-4'│ 'Introduction'│
+│    2    │ 'H6 → H3' │ 'changed' │ 'hs-6'│ 'Key Points'  │
+│    3    │   'H2'    │'unchanged'│  ''   │ 'Conclusion'  │
+└─────────┴───────────┴───────────┴───────┴───────────────┘
+⚓ H1  anchor  "Main Title"                    <h1>
+🔧 H4 → H2  changed  +hs-4 class  "Introduction"   <h2 class="hs-4" …>
+🔧 H6 → H3  changed  +hs-6 class  "Key Points"      <h3 class="hs-6" …>
+· H2  unchanged  "Conclusion"                  <h2>
 ℹ️  FYI: heading-healing logging is ON globally and persists across page loads. Turn it off any time with disableHeadingLogging().
 ```
 
 Because the global setting persists across page loads, that final **FYI line is printed at the end of every heal** while global logging is on — a reminder of how to turn it off so it doesn't quietly stay enabled. (It only appears when logging was switched on via the global `localStorage` override, not when you pass `logResults: true` to a single `fix()` call.)
+
+> Prefer to drive your own output? `fix()` always returns a [`HealResult`](#return-value) — call `console.table(result.headings)` yourself, or read `result.headings[n].element` for the live node.
 
 ### Manual localStorage Control
 
@@ -305,6 +323,38 @@ SemanticHeadingHierarchy.fix('.content-area', { promoteFirstHeading: true });
 
 The promoted heading keeps its original visual size via the `hs-X` class (same FLOUT prevention as a normal heal). The result's `promotedFirstHeading` flag will be `true`, and the promoted entry has `state: 'promoted'`.
 
+#### Headings Inside Lists (and `healListHeadings`)
+
+By default, a heading inside a **multi-item list** (a `<ul>`/`<ol>` whose immediate parent list has more than one `<li>`) is **left untouched** and reported with `state: 'skipped-list'` / `data-heading-processed="skipped-list"`. The reasoning: list items are usually repeated, uniform "cards" (article teasers, search results, rating widgets), and promoting only the *first* card's heading above its siblings would make the list look ragged.
+
+This is exactly why article-title `<h3>`s inside something like a Sitefinity `.mostRecentControl > ul > li` show up as skipped — they sit in a genuine multi-item list, so the healer deliberately leaves them alone. (A *single*-item list still heals normally; only lists with two or more `<li>` siblings are skipped.)
+
+If those list items are real content sections — not uniform cards — and the skip is leaving an `H1 → H3` jump unfixed, opt in with `healListHeadings: true` to evaluate and heal them like any other heading:
+
+```javascript
+SemanticHeadingHierarchy.fix('.content', { healListHeadings: true });
+```
+
+**Before (`H1 → H3` jump; list headings skipped by default):**
+```html
+<h1>Portal</h1>
+<ul class="mostRecentControl">
+    <li><h3>Article One</h3></li>   <!-- skipped-list by default -->
+    <li><h3>Article Two</h3></li>   <!-- skipped-list by default -->
+    <li><h3>Article Three</h3></li> <!-- skipped-list by default -->
+</ul>
+```
+
+**After (with `healListHeadings: true`):**
+```html
+<h1>Portal</h1>
+<ul class="mostRecentControl">
+    <li><h2 class="hs-3" data-prev-heading="3">Article One</h2></li> <!-- H3 → H2, closes the jump -->
+    <li><h3>Article Two</h3></li>   <!-- already valid as H3 under the new H2 -->
+    <li><h3>Article Three</h3></li> <!-- already valid as H3 -->
+</ul>
+```
+
 ### Multiple H1 Example with forceSingleH1
 
 **Before (Multiple H1s - accessibility violation):**
@@ -355,6 +405,7 @@ SemanticHeadingHierarchy.fix('.content-area', { logResults: true });
   - `options.classPrefix` (string, optional): Custom prefix for styling classes. Defaults to `'hs-'`
   - `options.forceSingleH1` (boolean, optional): Convert additional H1 elements to H2 elements. Defaults to `false`
   - `options.promoteFirstHeading` (boolean, optional): When no H1 exists in the container, promote its first heading (H2–H6) to H1 and heal from there instead of bailing. Defaults to `false`
+  - `options.healListHeadings` (boolean, optional): Also evaluate and heal headings inside multi-item lists. By default they are left untouched (`state: 'skipped-list'`) as uniform "card" content. Defaults to `false`
 
 **Requirements:**
 - **Must contain an H1 element** - The library requires an existing H1 to function (unless `promoteFirstHeading` is enabled)

@@ -1,6 +1,6 @@
 {
   "name": "semantic-heading-hierarchy",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "A JavaScript library that automatically invisibly corrects improper heading hierarchies for better accessibility. Used for user or admin edited content where the developer doesn't have 100% direct control over the content.",
   "type": "module",
   "main": "dist/index.cjs",

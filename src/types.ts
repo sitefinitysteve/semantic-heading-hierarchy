@@ -10,6 +10,14 @@ export interface FixOptions {
   forceSingleH1?: boolean;
   /** When no H1 exists, promote the first heading in the container to H1 instead of bailing */
   promoteFirstHeading?: boolean;
+  /**
+   * Heal headings that live inside multi-item lists too. By default headings inside a list
+   * with more than one `<li>` are left untouched (treated as repeated/uniform "card" content,
+   * so the first card is not visually promoted above its siblings). Enable this to evaluate and
+   * rewrite them like any other heading - useful when list items are real content sections whose
+   * H1 -> Hx jump must be corrected.
+   */
+  healListHeadings?: boolean;
 }
 
 /**

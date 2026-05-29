@@ -65,9 +65,9 @@ describe('McMaster homepage - full-page audit', () => {
     });
 
     it('is a no-op on the already-valid captured page', () => {
-        healHeadings(container, { logResults: true });
+        const result = healHeadings(container, { logResults: true });
 
-        expect(logSpy).toHaveBeenCalledWith('Heading structure fix complete. Modified 0 heading(s)');
+        expect(result.modifiedCount).toBe(0);
         // Only the pre-existing production heal marker remains; nothing new is added.
         expect(container.querySelectorAll('[data-prev-heading]').length).toBe(1);
     });

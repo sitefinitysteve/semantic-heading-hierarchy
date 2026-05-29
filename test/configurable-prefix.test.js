@@ -146,9 +146,10 @@ describe('healHeadings - Configurable Class Prefix', () => {
             const heading = container.querySelector('h2');
             expect(heading.classList.contains('custom-4')).toBe(true);
             
-            // Verify logging occurred with custom prefix
+            // Verify logging occurred with custom prefix (label arg + the live element arg)
             expect(consoleSpy).toHaveBeenCalledWith(
-                expect.stringContaining('custom-4 class')
+                expect.stringContaining('custom-4'),
+                expect.anything()
             );
 
             consoleSpy.mockRestore();

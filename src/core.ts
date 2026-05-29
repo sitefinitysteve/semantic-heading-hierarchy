@@ -1,4 +1,5 @@
 import { FixOptions, ElementReplacement, HealResult, HeadingResult } from './types.js';
+import { logHealSummary } from './logging.js';
 
 /**
  * Corrects improper heading hierarchies by ensuring proper semantic structure
@@ -16,6 +17,7 @@ export function healHeadings(
   let classPrefix = 'hs-';
   let forceSingleH1 = false;
   let promoteFirstHeading = false;
+  let healListHeadings = false;
 
   if (typeof options === 'boolean') {
     logResults = options;
@@ -24,6 +26,7 @@ export function healHeadings(
     classPrefix = options.classPrefix || 'hs-';
     forceSingleH1 = options.forceSingleH1 || false;
     promoteFirstHeading = options.promoteFirstHeading || false;
+    healListHeadings = options.healListHeadings || false;
   }
 
   // A classPrefix containing whitespace would make classList.add() throw and abort the heal
@@ -129,10 +132,6 @@ export function healHeadings(
       state: 'promoted',
       element: promotedH1
     });
-
-    if (logResults) {
-      console.log(`No H1 found - promoted first ${firstHeading.tagName} to H1 (added ${classPrefix}${promotedLevel} class)`);
-    }
   } else {
     // Mark the anchor H1 so a devtools inspection confirms the library ran on this container.
     h1Element.setAttribute('data-heading-processed', 'anchor');
@@ -189,14 +188,6 @@ export function healHeadings(
     headings = headingsAfterH1.filter(heading => heading.tagName.toLowerCase() !== 'h1');
   }
 
-  if (logResults) {
-    if (headings.length === 0) {
-      console.log('No H2-H6 headings found after H1 - nothing to fix');
-    } else {
-      console.log(`Found ${headings.length} heading(s) to process after H1`);
-    }
-  }
-
   let previousLevel = 1; // Start with H1 level
   const elementsToReplace: ElementReplacement[] = [];
 
@@ -206,8 +197,9 @@ export function healHeadings(
     const originalTag = heading.tagName.toLowerCase();
     const originalLevel = parseInt(originalTag.charAt(1), 10);
 
-    // Check if this heading is inside a list with sibling items
-    const listItem = heading.closest('li');
+    // Check if this heading is inside a list with sibling items. Skipped by default (uniform
+    // "card" content), but healListHeadings opts in to treating list headings like any other.
+    const listItem = healListHeadings ? null : heading.closest('li');
     if (listItem) {
       // Check if this li has sibling li elements. Count only the DIRECT children of the
       // immediate list - querySelectorAll('li') also matches <li> in nested sublists, which
@@ -219,9 +211,6 @@ export function healHeadings(
 
         if (siblingItems.length > 1) {
           // Skip headings in lists with multiple items
-          if (logResults) {
-            console.log(`Skipping ${originalTag} in list with ${siblingItems.length} items`);
-          }
           heading.setAttribute('data-heading-processed', 'skipped-list');
           outcomes.set(heading, { text: (heading.textContent || '').trim(), from: originalLevel, to: originalLevel, state: 'skipped-list', element: heading });
           continue;
@@ -262,10 +251,6 @@ export function healHeadings(
         originalLevel: originalLevel,
         originalTag: originalTag
       });
-
-      if (logResults) {
-        console.log(`Will change ${originalTag.toUpperCase()} → H${newLevel} (will add ${classPrefix}${originalLevel} class)`);
-      }
     }
 
     previousLevel = newLevel;
@@ -273,7 +258,7 @@ export function healHeadings(
 
   // Apply DOM modifications
   elementsToReplace.forEach((item) => {
-    const { original, newLevel, originalLevel, originalTag } = item;
+    const { original, newLevel, originalLevel } = item;
 
     // FIRST: Add visual styling class to original element to prevent FLOUT
     original.classList.add(`${classPrefix}${originalLevel}`);
@@ -302,20 +287,7 @@ export function healHeadings(
     if (outcome) {
       outcome.element = newHeading;
     }
-
-    if (logResults) {
-      console.log(`Replaced ${originalTag.toUpperCase()} with H${newLevel}, added ${classPrefix}${originalLevel} class`);
-    }
   });
-
-  if (logResults) {
-    console.log(`Heading structure fix complete. Modified ${elementsToReplace.length} heading(s)`);
-    // FYI on finish: the global override persists across page loads, so remind callers it is on
-    // (and how to turn it off) every time a heal completes while it is active.
-    if (logFromGlobalOverride) {
-      console.log('ℹ️  FYI: heading-healing logging is ON globally and persists across page loads. Turn it off any time with disableHeadingLogging().');
-    }
-  }
 
   // Assemble the per-heading outcomes in document order (allHeadings is the pre-modification
   // snapshot; each outcome.element has been repointed to its replacement where applicable).
@@ -323,10 +295,18 @@ export function healHeadings(
     .map(h => outcomes.get(h))
     .filter((r): r is HeadingResult => r !== undefined);
 
-  return {
+  const result: HealResult = {
     ran: true,
     promotedFirstHeading: didPromote,
     modifiedCount: elementsToReplace.length,
     headings: headingResults
   };
+
+  // One consolidated, collapsible console summary instead of a line per heading. Includes a
+  // table overview and clickable live-element references for "what changed" inspection.
+  if (logResults) {
+    logHealSummary(result, { classPrefix, fromGlobalOverride: logFromGlobalOverride });
+  }
+
+  return result;
 }
